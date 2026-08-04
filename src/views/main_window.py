@@ -1,5 +1,7 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QWidget
 
+from views.table import TableView  # TableViewをインポート
+
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -25,3 +27,6 @@ class MainWindow(QWidget):
         self.button.resize(100, 100)  # 幅100px、高さ50pxに設定
         self.button.show()
         self.button.move(50, 250)  # ボタンの位置を指定（左上からの座標）
+        self.table = TableView()  # TableViewのインスタンスを作成
+        self.table.setParent(self)  # TableViewをMainWindowの子ウィジェットとして設定
+        self.table.move(200, 50)  # TableViewの位置を指定（ 左上からの座標）
