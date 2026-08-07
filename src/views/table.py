@@ -1,23 +1,22 @@
-from PySide6.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHeaderView, QTableView, QVBoxLayout, QWidget
 
 
-class TableView(QWidget):
-    def __init__(self):
+# テーブルビューを表示するためのクラス
+# テーブルビューとは各回線情報を表示するために使用されるものです。
+class ConnectionTableView(QWidget):
+    def __init__(self, source_model):
         super().__init__()
 
-        # テーブルウィジェットの作成
-        self.table = QTableWidget(self)
-        self.table.setRowCount(5)  # 行数を設定
-        self.table.setColumnCount(3)  # 列数を設定
-        self.table.setHorizontalHeaderLabels(["NO", "INST", "PORT"])  # 列ヘッダーを設定
-
-        # テーブルにデータを追加
-        for row in range(5):
-            for column in range(3):
-                item = QTableWidgetItem(f"Item {row + 1}, {column + 1}")
-                self.table.setItem(row, column, item)
+        self.view = QTableView(self)  # QTableViewのインスタンスを作成
+        self.view.setModel(source_model)
+        self.view.resize(600, 500)
+        self.view.setEditTriggers(QTableView.EditTrigger.NoEditTriggers)
+        self.view.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Stretch
+        )  # 名前列に限り幅を自動調整する
+        self.view.setColumnWidth(1, 50)  # タイプ列の幅を50pxに固定する
 
         # レイアウトの作成とテーブルの追加
         layout = QVBoxLayout()
-        layout.addWidget(self.table)
+        layout.addWidget(self.view)
         self.setLayout(layout)
