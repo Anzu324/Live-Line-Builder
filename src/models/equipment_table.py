@@ -18,13 +18,13 @@ class EquipmentModel(QAbstractTableModel):
         return 0
 
     # 必須: データを返す
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+    def data(self, index, role: int = Qt.ItemDataRole.DisplayRole):
         # DisplayRoleは「画面に文字として表示するためのデータ」を要求された時
         if role == Qt.ItemDataRole.DisplayRole:
             return str(self._data[index.row()][index.column()])
         return None
 
-    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+    def headerData(self, section, orientation, role: int = Qt.ItemDataRole.DisplayRole):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 # 列のヘッダー
@@ -39,7 +39,7 @@ class EquipmentModel(QAbstractTableModel):
         # 基本的な選択・有効状態に加えて、編集可能フラグを足す
         return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
-    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
+    def setData(self, index, value, role: int = Qt.ItemDataRole.EditRole):
         if role == Qt.ItemDataRole.EditRole:
             # 入力されたvalueをデータに反映
             self._data[index.row()][index.column()] = value
@@ -66,17 +66,17 @@ class EquipmentConnectorModel(QAbstractTableModel):
         return 0
 
     # 必須: データを返す
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+    def data(self, index, role: int = Qt.ItemDataRole.DisplayRole):
         # DisplayRoleは「画面に文字として表示するためのデータ」を要求された時
         if role == Qt.ItemDataRole.DisplayRole:
             return str(self._data[index.row()][index.column()])
         return None
 
-    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+    def headerData(self, section, orientation, role: int = Qt.ItemDataRole.DisplayRole):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 # 列のヘッダー
-                headers = ["EQUIPMENT", "NAME", "CONNECTOR TYPE", "INPUT/OUTPUT"]
+                headers = ["EQUIPMENT", "NAME", "CONNECTOR TYPE", "IN/OUT"]
                 return headers[section]
             if orientation == Qt.Orientation.Vertical:
                 # 行のヘッダー（1, 2, 3...と表示する場合）
@@ -87,7 +87,7 @@ class EquipmentConnectorModel(QAbstractTableModel):
         # 基本的な選択・有効状態に加えて、編集可能フラグを足す
         return super().flags(index) | Qt.ItemFlag.ItemIsEditable
 
-    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
+    def setData(self, index, value, role: int = Qt.ItemDataRole.EditRole):
         if role == Qt.ItemDataRole.EditRole:
             # 入力されたvalueをデータに反映
             self._data[index.row()][index.column()] = value

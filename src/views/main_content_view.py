@@ -1,35 +1,55 @@
-from PySide6.QtCore import QRegularExpression, QSortFilterProxyModel
-from PySide6.QtWidgets import QHBoxLayout, QWidget
+from PySide6.QtCore import QAbstractItemModel, QSortFilterProxyModel
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
+from models.proxies.multi_filter_proxy import (
+    ExactMatchProxyModel,  # プロキシモデルをインポート
+)
 from views.table import EquipmentTableView  # テーブルビューをインポート
 
 
 class MainContentView(QWidget):
-    def __init__(self, source_model, parent=None):
+    def __init__(
+        self,
+        equipment_model: QAbstractItemModel,
+        connector_model: QAbstractItemModel,
+        multi_id_list: list[int],
+        parent=None,
+    ):
         super().__init__(parent)
 
         self.h_layout = QHBoxLayout(self)  # 垂直方向のレイアウトを作成
 
+        self.multi_column_layout = QVBoxLayout()  # マルチの列のレイアウトを作成
+        self.multi_table_views = []  # マルチの列のテーブルビューを保持するリスト
+
+        for x in multi_id_list:
+            proxy_model = ExactMatchProxyModel()
+            proxy_model.setSourceModel(connector_model)  # 元のModelをセット
+            proxy_model.set_filter_condition(0, str(x))  # フィルター対象の列と値を指定
+
+            table_view = EquipmentTableView(
+                proxy_model
+            )  # QTableViewのインスタンスを作成
+            self.multi_table_views.append(table_view)  # リストに追加
+            self.multi_column_layout.addWidget(table_view)  # レイアウトに追加
+
         proxy_model = QSortFilterProxyModel()
 
-        proxy_model.setSourceModel(source_model)  # 元のModelをセット
+        proxy_model.setSourceModel(equipment_model)  # 元のModelをセット
 
         # ★ 1. 検索対象の「列番号（0始まり）」を指定する（例: 2列目を対象にする）
         proxy_model.setFilterKeyColumn(1)
 
-        # ★ 2. 完全一致させたい検索値（例: "完了"）
-        target_value = "Mixer"
+        # # 正規表現で「先頭(^)から末尾($)まで完全一致」というパターンを作る
+        # pattern = f"^{QRegularExpression.escape(target_value)}$"
+        # regex = QRegularExpression(
+        #     pattern, QRegularExpression.PatternOption.CaseInsensitiveOption
+        # )
 
-        # 正規表現で「先頭(^)から末尾($)まで完全一致」というパターンを作る
-        pattern = f"^{QRegularExpression.escape(target_value)}$"
-        regex = QRegularExpression(
-            pattern, QRegularExpression.PatternOption.CaseInsensitiveOption
-        )
-
-        # フィルターをセット
-        proxy_model.setFilterRegularExpression(regex)
+        # # フィルターをセット
+        # proxy_model.setFilterRegularExpression(regex)
         self.table1_view = EquipmentTableView(
-            source_model
+            equipment_model
         )  # QTableViewのインスタンスを作成
 
         self.table2_view = EquipmentTableView(
@@ -37,9 +57,12 @@ class MainContentView(QWidget):
         )  # QTableViewのインスタンスを作成
 
         self.table3_view = EquipmentTableView(
-            source_model
+            equipment_model
         )  # QTableViewのインスタンスを作成
 
+        self.h_layout.addLayout(
+            self.multi_column_layout
+        )  # レイアウトに垂直レイアウトを追加
         self.h_layout.addWidget(self.table1_view)  # レイアウトにQTableViewを追加
         self.h_layout.addWidget(self.table2_view)  # レイアウトにQTableViewを追加
         self.h_layout.addWidget(self.table3_view)  # レイアウトにQTableViewを追加

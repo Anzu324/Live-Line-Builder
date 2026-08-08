@@ -42,10 +42,19 @@ class MainWindow(QWidget):
         )
 
         # コネクタのデータを保持するEquipmentConnectorModelのインスタンスを作成
-        self.connector_data = EquipmentConnectorModel([])
+        self.connector_data = EquipmentConnectorModel(
+            [
+                ["0", "1", "XLR", "IN"],
+                ["1", "1", "XLR", "IN"],
+                ["1", "2", "XLR", "IN"],
+                ["1", "3", "XLR", "IN"],
+            ]
+        )
 
         self.central_widget = MainContentView(
-            self.equipment_data
+            self.equipment_data,
+            self.connector_data,
+            [1],  # 例: 列0と列1をフィルター対象とする
         )  # メインコンテンツビューの作成
 
         self.v_layout.addWidget(self.label)  # レイアウトにラベルを追加
