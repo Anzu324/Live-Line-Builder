@@ -10,6 +10,7 @@ from views.main_content_view import (
 )
 
 
+# メインウィンドウのクラス
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()  # 親ウィジェットなしで初期化
@@ -27,15 +28,11 @@ class MainWindow(QWidget):
         # ウィジェットの作成と配置
         self.label = QLabel(self)
         self.label.setText("Hello World")  # ラベルのテキストを設定
-        self.label.resize(100, 50)  # 幅100px、高さ100pxに設定
         self.label.show()
-        # self.label.move(50, 50)  # ラベルの位置を指定（左上からの座標）
 
         self.button = QPushButton(self)  # ボタンの作成
         self.button.setText("Click Me")  # ボタンのテキストを設定
-        self.button.resize(100, 100)  # 幅100px、高さ50pxに設定
         self.button.show()
-        # self.button.move(50, 250)  # ボタンの位置を指定（左上からの座標）
 
         # EquipmentModelのインスタンスを作成
         self.equipment_data = EquipmentModel(equipment_data)  # モックデータを渡す

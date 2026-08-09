@@ -7,6 +7,8 @@ from models.proxies.multi_filter_proxy import (
 from views.table import EquipmentTableView  # テーブルビューをインポート
 
 
+# メインコンテンツビューのクラス
+# メインコンテンツビューとは、中央にある、図や表を表示する為のウィジェットです。
 class MainContentView(QWidget):
     def __init__(
         self,
