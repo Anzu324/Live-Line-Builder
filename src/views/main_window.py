@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
+from mock.mock_data import connector_data, equipment_data  # モックデータをインポート
 from models.equipment_table import (  # モデルをインポート
     EquipmentConnectorModel,
     EquipmentModel,
@@ -37,24 +38,17 @@ class MainWindow(QWidget):
         # self.button.move(50, 250)  # ボタンの位置を指定（左上からの座標）
 
         # EquipmentModelのインスタンスを作成
-        self.equipment_data = EquipmentModel(
-            [["MG24/14FX", "Mixer"], ["CP20Multi", "Snake"]]
-        )
+        self.equipment_data = EquipmentModel(equipment_data)  # モックデータを渡す
 
         # コネクタのデータを保持するEquipmentConnectorModelのインスタンスを作成
         self.connector_data = EquipmentConnectorModel(
-            [
-                ["0", "1", "XLR", "IN"],
-                ["1", "1", "XLR", "IN"],
-                ["1", "2", "XLR", "IN"],
-                ["1", "3", "XLR", "IN"],
-            ]
-        )
+            connector_data
+        )  # モックデータを渡す
 
         self.central_widget = MainContentView(
             self.equipment_data,
             self.connector_data,
-            [1],  # 例: 列0と列1をフィルター対象とする
+            [1, 2],  # 例: 列0と列1をフィルター対象とする
         )  # メインコンテンツビューの作成
 
         self.v_layout.addWidget(self.label)  # レイアウトにラベルを追加

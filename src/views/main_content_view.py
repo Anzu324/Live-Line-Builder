@@ -20,9 +20,12 @@ class MainContentView(QWidget):
         self.h_layout = QHBoxLayout(self)  # 垂直方向のレイアウトを作成
 
         self.multi_column_layout = QVBoxLayout()  # マルチの列のレイアウトを作成
+        self.multi_column_layout.setContentsMargins(0, 0, 0, 0)
+        self.multi_column_layout.setSpacing(1)  # レイアウトの余白を1に設定
         self.multi_table_views = []  # マルチの列のテーブルビューを保持するリスト
 
         for x in multi_id_list:
+            print(f"Creating table for equipment ID: {x}")  # デバッグ用の出力
             proxy_model = ExactMatchProxyModel()
             proxy_model.setSourceModel(connector_model)  # 元のModelをセット
             proxy_model.set_filter_condition(0, str(x))  # フィルター対象の列と値を指定
