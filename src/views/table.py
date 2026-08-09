@@ -1,12 +1,14 @@
 from PySide6.QtCore import QAbstractItemModel
-from PySide6.QtWidgets import QHeaderView, QTableView, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHeaderView, QLabel, QTableView, QVBoxLayout, QWidget
 
 
 # テーブルビューを表示するためのクラス
 # テーブルビューとは各回線情報を表示するために使用されるものです。
 class EquipmentTableView(QWidget):
-    def __init__(self, source_model: QAbstractItemModel, parent=None):
+    def __init__(self, title: str, source_model: QAbstractItemModel, parent=None):
         super().__init__(parent)
+
+        title_label = QLabel(title)  # タイトルラベルを作成
 
         self.view = QTableView(self)  # QTableViewのインスタンスを作成
         self.view.setModel(source_model)
@@ -24,7 +26,9 @@ class EquipmentTableView(QWidget):
 
         # レイアウトの作成とテーブルの追加
         self.layout_a = QVBoxLayout()
+        self.layout_a.addWidget(title_label)
         self.layout_a.addWidget(self.view)
 
         self.layout_a.setContentsMargins(0, 0, 0, 0)
+        self.layout_a.setSpacing(1)
         self.setLayout(self.layout_a)

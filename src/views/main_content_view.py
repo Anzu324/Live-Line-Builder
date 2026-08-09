@@ -28,7 +28,8 @@ class MainContentView(QWidget):
             proxy_model.set_filter_condition(0, str(x))  # フィルター対象の列と値を指定
 
             table_view = EquipmentTableView(
-                proxy_model
+                f"{equipment_model.data(equipment_model.index(x, 0), 0)}",  # タイトルを設定
+                proxy_model,
             )  # QTableViewのインスタンスを作成
             self.multi_table_views.append(table_view)  # リストに追加
             self.multi_column_layout.addWidget(table_view)  # レイアウトに追加
@@ -40,24 +41,16 @@ class MainContentView(QWidget):
         # ★ 1. 検索対象の「列番号（0始まり）」を指定する（例: 2列目を対象にする）
         proxy_model.setFilterKeyColumn(1)
 
-        # # 正規表現で「先頭(^)から末尾($)まで完全一致」というパターンを作る
-        # pattern = f"^{QRegularExpression.escape(target_value)}$"
-        # regex = QRegularExpression(
-        #     pattern, QRegularExpression.PatternOption.CaseInsensitiveOption
-        # )
-
-        # # フィルターをセット
-        # proxy_model.setFilterRegularExpression(regex)
         self.table1_view = EquipmentTableView(
-            equipment_model
+            "Table 1", equipment_model
         )  # QTableViewのインスタンスを作成
 
         self.table2_view = EquipmentTableView(
-            proxy_model
+            "Table 2", proxy_model
         )  # QTableViewのインスタンスを作成
 
         self.table3_view = EquipmentTableView(
-            equipment_model
+            "Table 3", equipment_model
         )  # QTableViewのインスタンスを作成
 
         self.h_layout.addLayout(
