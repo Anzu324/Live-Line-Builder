@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from mock.mock_data import connector_data, equipment_data  # モックデータをインポート
 from models.equipment_table import (  # モデルをインポート
@@ -34,6 +34,14 @@ class MainWindow(QWidget):
         self.button.setText("Click Me")  # ボタンのテキストを設定
         self.button.show()
 
+        scroll_area = QScrollArea()
+
+        # 中身のウィジェットをスクロールエリアの幅に自動フィットさせる
+        scroll_area.setWidgetResizable(True)
+
+        # 【オプション】潰れすぎ防止：最低でも「幅250px / 高さ200px」は確保する
+        scroll_area.setMinimumSize(250, 200)
+
         # EquipmentModelのインスタンスを作成
         self.equipment_data = EquipmentModel(equipment_data)  # モックデータを渡す
 
@@ -47,9 +55,8 @@ class MainWindow(QWidget):
             self.connector_data,
             [1, 2],  # 例: 列0と列1をフィルター対象とする
         )  # メインコンテンツビューの作成
+        scroll_area.setWidget(self.central_widget)
 
         self.v_layout.addWidget(self.label)  # レイアウトにラベルを追加
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
-        self.v_layout.addWidget(
-            self.central_widget
-        )  # レイアウトにメインコンテンツビューを追加
+        self.v_layout.addWidget(scroll_area)  # レイアウトにメインコンテンツビューを追加

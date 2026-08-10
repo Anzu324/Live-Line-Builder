@@ -15,6 +15,7 @@ class EquipmentTableView(QWidget):
         self.view.resize(600, 500)
         self.view.setEditTriggers(QTableView.EditTrigger.NoEditTriggers)
         self.view.verticalHeader().setVisible(False)
+        self.adjust_table_height()
 
         self.view.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents
@@ -32,3 +33,13 @@ class EquipmentTableView(QWidget):
         self.layout_a.setContentsMargins(0, 0, 0, 0)
         self.layout_a.setSpacing(1)
         self.setLayout(self.layout_a)
+
+    def adjust_table_height(self):
+        h = (
+            self.view.horizontalHeader().height()
+            + self.view.verticalHeader().length()
+            + (self.view.frameWidth() * 2)
+        )
+
+        # スクロールバーが出ない最小サイズとして設定
+        self.view.setMinimumHeight(h)
