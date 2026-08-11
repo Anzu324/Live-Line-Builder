@@ -28,7 +28,7 @@ class EquipmentModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 # 列のヘッダー
-                headers = ["NAME", "TYPE"]
+                headers = ["ID", "NAME", "TYPE"]
                 return headers[section]
             if orientation == Qt.Orientation.Vertical:
                 # 行のヘッダー（1, 2, 3...と表示する場合）
@@ -47,6 +47,13 @@ class EquipmentModel(QAbstractTableModel):
             self.dataChanged.emit(index, index)
             return True
         return False
+
+    # 独自メソッド
+    def get_product_at(self, row: int) -> list[str] | None:
+        """指定した行のデータ（辞書）をそのまま返すヘルパーメソッド"""
+        if 0 <= row < len(self._data):
+            return self._data[row]
+        return None
 
 
 # 各機材の各コネクタの情報を保持するモデルクラス

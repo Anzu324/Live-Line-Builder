@@ -1,6 +1,6 @@
-from PySide6.QtCore import QAbstractItemModel
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
+from models.equipment_table import EquipmentConnectorModel, EquipmentModel
 from models.proxies.multi_filter_proxy import (
     ExactMatchProxyModel,  # プロキシモデルをインポート
 )
@@ -12,8 +12,8 @@ from views.table import EquipmentTableView  # テーブルビューをインポ�
 class MainContentView(QWidget):
     def __init__(
         self,
-        equipment_model: QAbstractItemModel,
-        connector_model: QAbstractItemModel,
+        equipment_model: EquipmentModel,
+        connector_model: EquipmentConnectorModel,
         multi_id_list: list[int],
         parent=None,
     ):
@@ -26,10 +26,18 @@ class MainContentView(QWidget):
         self.multi_table_views = []  # マルチの列のテーブルビューを保持するリスト
 
         for x in multi_id_list:
-            print(f"Creating table for equipment ID: {x}")  # デバッグ用の出力
             proxy_model = ExactMatchProxyModel()
             proxy_model.setSourceModel(connector_model)  # 元のModelをセット
-            proxy_model.set_filter_condition(0, str(x))  # フィルター対象の列と値を指定
+            if i := equipment_model.get_product_at(x):
+                print(
+                    f"Creating table for equipment ID: {x}:{i[0]}"
+                )  # デバッグ用の出力
+                proxy_model.set_filter_condition(
+                    0, str(i[0])
+                )  # フィルター対象の列と値を指定
+
+            if proxy_model.rowCount() == 0:
+                break  # コネクターが一つも無いものを自動的に除外する。
 
             table_view = EquipmentTableView(
                 f"{equipment_model.data(equipment_model.index(x, 0), 0)}",  # タイトルを設定
