@@ -3,7 +3,7 @@ from PySide6.QtCore import QSortFilterProxyModel, Qt
 
 # プロキシモデルのクラス
 # プロキシモデルとは、元のモデルのデータを加工して表示するためのモデルです。
-class ExactMatchProxyModel(QSortFilterProxyModel):
+class MultiFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._target_column = 0  # 対象の列

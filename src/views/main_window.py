@@ -1,10 +1,7 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from mock.mock_data import connector_data, equipment_data  # モックデータをインポート
-from models.equipment_table import (  # モデルをインポート
-    EquipmentConnectorModel,
-    EquipmentModel,
-)
+from models import EquipmentConnectorModel, EquipmentModel  # モデルをインポート
 from views.main_content_view import (
     MainContentView,  # メインコンテンツビューをインポート
 )

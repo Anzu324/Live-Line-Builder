@@ -1,9 +1,7 @@
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
-from models.equipment_table import EquipmentConnectorModel, EquipmentModel
-from models.proxies.multi_filter_proxy import (
-    ExactMatchProxyModel,  # プロキシモデルをインポート
-)
+from models import EquipmentConnectorModel, EquipmentModel
+from models.proxies import MultiFilterProxyModel  # プロキシモデルをインポート
 from views.table import EquipmentTableView  # テーブルビューをインポート
 
 
@@ -26,7 +24,7 @@ class MainContentView(QWidget):
         self.multi_table_views = []  # マルチの列のテーブルビューを保持するリスト
 
         for x in multi_id_list:
-            proxy_model = ExactMatchProxyModel()
+            proxy_model = MultiFilterProxyModel()
             proxy_model.setSourceModel(connector_model)  # 元のModelをセット
             if i := equipment_model.get_product_at(x):
                 print(
