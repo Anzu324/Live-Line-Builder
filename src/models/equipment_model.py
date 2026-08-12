@@ -3,9 +3,12 @@ from PySide6.QtCore import QAbstractTableModel, Qt
 
 # 各機材の情報を保持するモデルクラス
 class EquipmentModel(QAbstractTableModel):
-    def __init__(self, data):
+    def __init__(self, data: list[list[str]] | None = None):
         super().__init__()
-        self._data = data  # 2次元リストなどのデータを保持
+        if data is None:
+            self._data = []
+        else:
+            self._data = data  # 2次元リストなどのデータを保持
 
     # 必須: 行数を返す
     def rowCount(self, parent=None):
@@ -58,9 +61,12 @@ class EquipmentModel(QAbstractTableModel):
 
 # 各機材の各コネクタの情報を保持するモデルクラス
 class EquipmentConnectorModel(QAbstractTableModel):
-    def __init__(self, data):
+    def __init__(self, data: list[list[str]] | None = None):
         super().__init__()
-        self._data = data  # 2次元リストなどのデータを保持
+        if data is None:
+            self._data = []
+        else:
+            self._data = data  # 2次元リストなどのデータを保持
 
     # 必須: 行数を返す
     def rowCount(self, parent=None):

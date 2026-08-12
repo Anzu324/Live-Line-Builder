@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
-from mock.mock_data import connector_data, equipment_data  # モックデータをインポート
-from models import EquipmentConnectorModel, EquipmentModel  # モデルをインポート
+from models import DataManager  # モデルをインポート
 from views.main_content_view import (
     MainContentView,  # メインコンテンツビューをインポート
 )
@@ -39,17 +38,20 @@ class MainWindow(QWidget):
         # 【オプション】潰れすぎ防止：最低でも「幅250px / 高さ200px」は確保する
         scroll_area.setMinimumSize(250, 200)
 
+        # ----------------------------------
+        # データマネージャーを用意
+        # ----------------------------------
+        self.data_manager = DataManager.factory_by_mock()
+
         # EquipmentModelのインスタンスを作成
-        self.equipment_data = EquipmentModel(equipment_data)  # モックデータを渡す
+        equipment_data = self.data_manager.equipments
 
         # コネクタのデータを保持するEquipmentConnectorModelのインスタンスを作成
-        self.connector_data = EquipmentConnectorModel(
-            connector_data
-        )  # モックデータを渡す
+        connector_data = self.data_manager.equipmentconnectors
 
         self.central_widget = MainContentView(
-            self.equipment_data,
-            self.connector_data,
+            equipment_data,
+            connector_data,
             [1, 2],  # 例: 列0と列1をフィルター対象とする
         )  # メインコンテンツビューの作成
         scroll_area.setWidget(self.central_widget)
