@@ -3,6 +3,8 @@ from PySide6.QtCore import QObject, Signal
 from app_mock import mock_data
 
 from .equipment_model import EquipmentConnectorModel, EquipmentModel
+from .performance_model import PerformanceModel
+from .project_data_model import ProjectDataModel
 
 
 # ★ QObject を継承する
@@ -15,10 +17,13 @@ class DataManager(QObject):
         self,
         parent=None,
         equipments: list[list[str]] | None = None,
-        equipmentconnectors: list[list[str]] | None = None,
+        equipment_ports: list[list[str]] | None = None,
     ):
         # ★ 親クラス（QObject）の初期化を必ず呼ぶ！
         super().__init__(parent)
+
+        self.project_datum = ProjectDataModel()
+        self.performance_data = [PerformanceModel()]
 
         # 文字列で機器表を初期化する
         if equipments is None:
@@ -27,23 +32,23 @@ class DataManager(QObject):
             self._equipments = EquipmentModel(equipments)
 
         # 文字列でコネクター表を初期化する。
-        if equipmentconnectors is None:
-            self._equipmentconnectors = EquipmentConnectorModel()
+        if equipment_ports is None:
+            self._equipment_ports = EquipmentConnectorModel()
         else:
-            self._equipmentconnectors = EquipmentConnectorModel(equipmentconnectors)
+            self._equipment_ports = EquipmentConnectorModel(equipment_ports)
 
     # モックでデータマネージャーを構築する
     @staticmethod
     def factory_by_mock() -> DataManager:
-        return DataManager(None, mock_data.equipment_data, mock_data.connector_data)
+        return DataManager(None, mock_data.equipment_data, mock_data.port_data)
 
     @property
     def equipments(self):
         return self._equipments
 
     @property
-    def equipmentconnectors(self):
-        return self._equipmentconnectors
+    def equipment_ports(self):
+        return self._equipment_ports
 
     # def add_product(self, product_data: dict):
     #     """商品追加と同時にシグナルを発火する"""

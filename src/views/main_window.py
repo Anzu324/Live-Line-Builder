@@ -47,7 +47,7 @@ class MainWindow(QWidget):
         equipment_data = self.data_manager.equipments
 
         # コネクタのデータを保持するEquipmentConnectorModelのインスタンスを作成
-        connector_data = self.data_manager.equipmentconnectors
+        connector_data = self.data_manager.equipment_ports
 
         self.central_widget = MainContentView(
             equipment_data,

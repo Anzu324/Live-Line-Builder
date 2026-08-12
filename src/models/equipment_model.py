@@ -1,5 +1,10 @@
 from PySide6.QtCore import QAbstractTableModel, Qt
 
+"""
+ここのモデルは機器の情報であってライブでどのように接続するかの情報でない。
+どのような名前のどのような種類のどんな端子を持った機器であるかを定義するもの。
+"""
+
 
 # 各機材の情報を保持するモデルクラス
 class EquipmentModel(QAbstractTableModel):

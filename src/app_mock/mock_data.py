@@ -3,7 +3,7 @@ equipment_data = [
     ["equip_0002", "CANARE 12ch", "Multi"],
     ["equip_0003", "CP20Multi", "Multi"],
 ]
-connector_data = [
+port_data = [
     ["equip_0001", "1", "XLR", "IN"],
     ["equip_0002", "1", "XLR", "IN"],
     ["equip_0002", "2", "XLR", "IN"],
