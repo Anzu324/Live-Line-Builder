@@ -25,5 +25,5 @@ dev = [
 
 [tool.ruff]
 lint.ignore = [
-    "F401", # undocumented-magic-method
+    "F401", # __init__で未参照を無視
 ]
