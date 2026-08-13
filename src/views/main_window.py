@@ -1,9 +1,10 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
-from models import DataManager  # モデルをインポート
 from views.main_content_view import (
     MainContentView,  # メインコンテンツビューをインポート
 )
+
+from .app_controller import AppController  # モデルをインポート
 
 
 # メインウィンドウのクラス
@@ -41,7 +42,7 @@ class MainWindow(QWidget):
         # ----------------------------------
         # データマネージャーを用意
         # ----------------------------------
-        self.data_manager = DataManager.factory_by_mock()
+        self.data_manager = AppController.factory_by_mock()
 
         # EquipmentModelのインスタンスを作成
         equipment_data = self.data_manager.equipments

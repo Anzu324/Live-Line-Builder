@@ -2,13 +2,17 @@ from PySide6.QtCore import QObject, Signal
 
 from app_mock import mock_data
 
-from .equipment_model import EquipmentModel, EquipmentPortModel
-from .performance_model import PerformanceModel
-from .project_data_model import ProjectDataModel
+from ..models.equipment_model import EquipmentModel, EquipmentPortModel
+from ..models.performance_model import PerformanceModel
+from ..models.project_data_model import ProjectDataModel
 
 
 # ★ QObject を継承する
-class DataManager(QObject):
+class AppController(QObject):
+    """
+    main_windowに代わってモデルの配線を担当。
+    """
+
     # ★ カスタムシグナルの定義（QObject の直下に書く）
     data_changed = Signal()  # 引数なしの通知
     product_added = Signal(dict)  # 追加された商品データ（dict）を飛ばす通知
@@ -39,8 +43,8 @@ class DataManager(QObject):
 
     # モックでデータマネージャーを構築する
     @staticmethod
-    def factory_by_mock() -> DataManager:
-        return DataManager(None, mock_data.equipment_data, mock_data.port_data)
+    def factory_by_mock() -> AppController:
+        return AppController(None, mock_data.equipment_data, mock_data.port_data)
 
     @property
     def equipments(self):
