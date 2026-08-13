@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, Signal
 
 from app_mock import mock_data
 
-from .equipment_model import EquipmentConnectorModel, EquipmentModel
+from .equipment_model import EquipmentModel, EquipmentPortModel
 from .performance_model import PerformanceModel
 from .project_data_model import ProjectDataModel
 
@@ -16,7 +16,7 @@ class DataManager(QObject):
     def __init__(
         self,
         parent=None,
-        equipments: list[list[str]] | None = None,
+        equipment_list: list[list[str]] | None = None,
         equipment_ports: list[list[str]] | None = None,
     ):
         # ★ 親クラス（QObject）の初期化を必ず呼ぶ！
@@ -26,16 +26,16 @@ class DataManager(QObject):
         self.performance_data = [PerformanceModel()]
 
         # 文字列で機器表を初期化する
-        if equipments is None:
+        if equipment_list is None:
             self._equipments = EquipmentModel()
         else:
-            self._equipments = EquipmentModel(equipments)
+            self._equipments = EquipmentModel(equipment_list)
 
         # 文字列でコネクター表を初期化する。
         if equipment_ports is None:
-            self._equipment_ports = EquipmentConnectorModel()
+            self._equipment_ports = EquipmentPortModel()
         else:
-            self._equipment_ports = EquipmentConnectorModel(equipment_ports)
+            self._equipment_ports = EquipmentPortModel(equipment_ports)
 
     # モックでデータマネージャーを構築する
     @staticmethod

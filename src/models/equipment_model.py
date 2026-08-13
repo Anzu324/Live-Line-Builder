@@ -65,7 +65,7 @@ class EquipmentModel(QAbstractTableModel):
 
 
 # 各機材の各コネクタの情報を保持するモデルクラス
-class EquipmentConnectorModel(QAbstractTableModel):
+class EquipmentPortModel(QAbstractTableModel):
     def __init__(self, data: list[list[str]] | None = None):
         super().__init__()
         if data is None:
@@ -94,7 +94,7 @@ class EquipmentConnectorModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 # 列のヘッダー
-                headers = ["EQUIPMENT", "NAME", "CONNECTOR TYPE", "IN/OUT"]
+                headers = ["EQUIPMENT", "NAME", "CONNECTOR", "IN/OUT"]
                 return headers[section]
             if orientation == Qt.Orientation.Vertical:
                 # 行のヘッダー（1, 2, 3...と表示する場合）

@@ -15,7 +15,7 @@ port_data = [
     ["equip_0002", "8", "XLR", "IN"],
     ["equip_0002", "9", "XLR", "IN"],
     ["equip_0002", "10", "XLR", "IN"],
-    ["equip_0002", "1", "XLR", "IN"],
-    ["equip_0002", "2", "XLR", "IN"],
-    ["equip_0002", "3", "XLR", "IN"],
+    ["equip_0003", "1", "XLR", "IN"],
+    ["equip_0003", "2", "XLR", "IN"],
+    ["equip_0003", "3", "XLR", "IN"],
 ]

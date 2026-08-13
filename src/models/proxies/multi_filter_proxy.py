@@ -9,7 +9,7 @@ class MultiFilterProxyModel(QSortFilterProxyModel):
         self._target_column = 0  # 対象の列
         self._search_value = ""  # 検索したい値
         self._hidden_columns = set()  # 非表示にしたい列番号（インデックス）
-        self._hidden_columns.add(2)  # 例: 列2を非表示にする場合は、ここで追加する
+        self._hidden_columns.add(0)  # 例: 列2を非表示にする場合は、ここで追加する
         self._hidden_columns.add(3)  # 例: 列3を非表示にする場合は、ここで追加する
 
     def set_filter_condition(self, column: int, value: str):

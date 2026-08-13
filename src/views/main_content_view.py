@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
-from models import EquipmentConnectorModel, EquipmentModel
+from models import EquipmentModel, EquipmentPortModel
 from models.proxies import MultiFilterProxyModel  # プロキシモデルをインポート
 from views.table import EquipmentTableView  # テーブルビューをインポート
 
@@ -11,7 +11,7 @@ class MainContentView(QWidget):
     def __init__(
         self,
         equipment_model: EquipmentModel,
-        connector_model: EquipmentConnectorModel,
+        connector_model: EquipmentPortModel,
         multi_id_list: list[int],
         parent=None,
     ):
