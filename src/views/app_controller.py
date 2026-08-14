@@ -1,7 +1,7 @@
 from PySide6.QtCore import QObject, Signal
 
 from app_mock import mock_data
-from domain.entities import PerformanceModel, ProjectDataModel
+from domain.entities import PerformanceEntity, ProjectDataEntity
 from models import DataManager, EquipmentModel, EquipmentPortModel
 
 
@@ -25,8 +25,8 @@ class AppController(QObject):
         # 親クラスのQObjectのご加護を得る
         super().__init__(parent)
 
-        self.project_datum = ProjectDataModel()
-        self.performance_data = [PerformanceModel()]
+        self.project_datum = ProjectDataEntity()
+        self.performance_data = [PerformanceEntity()]
 
         self._data_mangeger = DataManager(
             self, equipment_list=equipment_list, equipment_ports=equipment_ports

@@ -1,4 +1,4 @@
-class PerformanceModel:
+class PerformanceEntity:
     """
     各公演ごとの基本情報を保持する
     """

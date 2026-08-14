@@ -1,4 +1,4 @@
-class ProjectDataModel:
+class ProjectDataEntity:
     """
     プロジェクト(ファイル)ごとの情報を保持する。
     ファイル名や保存パスなど。保存時は加工が必要かも?
