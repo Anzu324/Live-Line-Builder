@@ -20,6 +20,15 @@ class PerformanceModel(QObject):
         self.data_changed.emit()
 
     @property
+    def place(self) -> str:
+        return self._performance.place
+
+    @place.setter
+    def place(self, value: str) -> None:
+        self._performance.place = value
+        self.data_changed.emit()
+
+    @property
     def day(self) -> str:
         return self._performance.day
 

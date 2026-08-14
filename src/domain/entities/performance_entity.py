@@ -4,6 +4,7 @@ class PerformanceEntity:
     """
 
     name: str = "New PerForMance"
+    place: str = "視聴覚ホール"
     day: str = ""
     live_director: str = ""
     sound_director: str = ""
