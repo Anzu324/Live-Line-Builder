@@ -1,5 +1,7 @@
 from PySide6.QtCore import QAbstractTableModel, Qt
 
+from domain.entities import EquipmentEntity, EquipmentPortEntity
+
 """
 ここのモデルは機器の情報であってライブでどのように接続するかの情報でない。
 どのような名前のどのような種類のどんな端子を持った機器であるかを定義するもの。
@@ -8,12 +10,9 @@ from PySide6.QtCore import QAbstractTableModel, Qt
 
 # 各機材の情報を保持するモデルクラス
 class EquipmentModel(QAbstractTableModel):
-    def __init__(self, data: list[list[str]] | None = None):
-        super().__init__()
-        if data is None:
-            self._data = []
-        else:
-            self._data = data  # 2次元リストなどのデータを保持
+    def __init__(self, data: EquipmentEntity, parent=None):
+        super().__init__(parent)
+        self._data = data  # 2次元リストなどのデータを保持
 
     # 必須: 行数を返す
     def rowCount(self, parent=None):
@@ -66,12 +65,9 @@ class EquipmentModel(QAbstractTableModel):
 
 # 各機材の各コネクタの情報を保持するモデルクラス
 class EquipmentPortModel(QAbstractTableModel):
-    def __init__(self, data: list[list[str]] | None = None):
-        super().__init__()
-        if data is None:
-            self._data = []
-        else:
-            self._data = data  # 2次元リストなどのデータを保持
+    def __init__(self, data: EquipmentPortEntity, parent=None):
+        super().__init__(parent)
+        self._data = data  # 2次元リストなどのデータを保持
 
     # 必須: 行数を返す
     def rowCount(self, parent=None):
