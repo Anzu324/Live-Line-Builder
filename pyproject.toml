@@ -23,7 +23,5 @@ dev = [
     "ruff>=0.16.1",
 ]
 
-[tool.ruff]
-lint.ignore = [
-    "F401", # __init__で未参照を無視
-]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
