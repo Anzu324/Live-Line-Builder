@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLineEdit, QVBoxLayout, QWidget
 
 from models import EquipmentModel, EquipmentPortModel
 from models.proxies import MultiFilterProxyModel  # プロキシモデルをインポート
@@ -16,8 +16,20 @@ class MainContentView(QWidget):
         parent=None,
     ):
         super().__init__(parent)
-
+        self.v_layout = QVBoxLayout(self)
         self.h_layout = QHBoxLayout(self)  # 垂直方向のレイアウトを作成
+
+        # ライブ情報エリア
+        formLayout = QFormLayout()
+        self.show_name = QLineEdit()
+        self.show_location = QLineEdit()
+        self.show_day = QLineEdit()
+        formLayout.addRow(self.tr("公演名"), self.show_name)
+        formLayout.addRow(self.tr("開場"), self.show_location)
+        formLayout.addRow(self.tr("日時"), self.show_day)
+        self.v_layout.addLayout(formLayout)
+
+        # 回線エリア
         self.multi_column_layout = QVBoxLayout()  # マルチの列のレイアウトを作成
         self.multi_column_layout.setContentsMargins(0, 0, 0, 0)
         self.multi_column_layout.setSpacing(1)  # レイアウトの余白を1に設定
@@ -59,5 +71,5 @@ class MainContentView(QWidget):
         self.h_layout.addWidget(self.table3_view)  # レイアウトにQTableViewを追加
         self.h_layout.setContentsMargins(0, 0, 0, 0)
         self.h_layout.setSpacing(10)  # レイアウトの余白を10に設定
-
-        self.setLayout(self.h_layout)  # 垂直レイアウトに水平レイアウトを追
+        self.v_layout.addLayout(self.h_layout)
+        self.setLayout(self.v_layout)  # 垂直レイアウトに水平レイアウトを追
