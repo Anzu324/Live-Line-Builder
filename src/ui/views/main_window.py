@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
-from views.main_content_view import (
+from ui.views.main_content_view import (
     MainContentView,  # メインコンテンツビューをインポート
 )
 
