@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar
 
 
 @dataclass
@@ -16,7 +16,7 @@ class TableEntity:
     columns: テーブル型のエンティティの列を指定。__init__無くとも簡易的に切り替えできる。
     """
 
-    columns: list[Column] = []
+    columns: ClassVar[list[Column]] = []
 
     def __init__(self, rows: list[dict] | None = None):
         # 中身は [{"id": "p01", "name": "頭部", "hp": 100}, ...] のような辞書リスト
