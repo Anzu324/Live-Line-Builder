@@ -1,16 +1,18 @@
 import sys
 
-from PySide6.QtWidgets import QApplication, QLabel
+import qdarktheme
+from PySide6.QtWidgets import QApplication
+
+from live_line_builder.ui.views.main_window import MainWindow
 
 # 1. アプリケーションの作成（必須）
 app = QApplication(sys.argv)
 
+qdarktheme.setup_theme()
 # 2. ウィジェット（画面パーツ）の作成と設定
-label = QLabel("Hello World")
-label.resize(300, 200)  # 幅300px、高さ200pxに設定
+main_window = MainWindow()
+main_window.show()
 
-# 3. 画面に表示する
-label.show()
-
-# 4. イベントループの開始（ウィンドウを閉じないように保持）
 sys.exit(app.exec())
+
+app.exec()

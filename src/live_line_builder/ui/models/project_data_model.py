@@ -1,6 +1,6 @@
 from PySide6.QtCore import QObject, Signal
 
-from domain.entities import PerformanceEntity
+from live_line_builder.domain.entities import PerformanceEntity
 
 
 class PerformanceModel(QObject):

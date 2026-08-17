@@ -1,8 +1,8 @@
 from PySide6.QtCore import QObject, Signal
 
-from app_mock import mock_data
-from domain.entities import PerformanceEntity, ProjectDataEntity
-from ui.models import DataManager, EquipmentModel, EquipmentPortModel
+from live_line_builder.app_mock import mock_data
+from live_line_builder.domain.entities import PerformanceEntity, ProjectDataEntity
+from live_line_builder.ui.models import DataManager, EquipmentModel, EquipmentPortModel
 
 
 # ★ QObject を継承する

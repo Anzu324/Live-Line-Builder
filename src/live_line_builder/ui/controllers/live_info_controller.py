@@ -1,7 +1,7 @@
 from PySide6.QtCore import QObject, Slot
 
-from ui.models import PerformanceModel
-from ui.views import LiveInfoView
+from live_line_builder.ui.models import PerformanceModel
+from live_line_builder.ui.views import LiveInfoView
 
 
 class LiveInfoController(QObject):

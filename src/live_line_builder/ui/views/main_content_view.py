@@ -1,8 +1,12 @@
 from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLineEdit, QVBoxLayout, QWidget
 
-from ui.models import EquipmentModel, EquipmentPortModel
-from ui.models.proxies import MultiFilterProxyModel  # プロキシモデルをインポート
-from ui.views.table import EquipmentTableView  # テーブルビューをインポート
+from live_line_builder.ui.models import EquipmentModel, EquipmentPortModel
+from live_line_builder.ui.models.proxies import (
+    MultiFilterProxyModel,  # プロキシモデルをインポート
+)
+from live_line_builder.ui.views.table import (
+    EquipmentTableView,  # テーブルビューをインポート
+)
 
 
 # メインコンテンツビューのクラス

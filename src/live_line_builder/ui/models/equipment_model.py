@@ -1,6 +1,6 @@
 from PySide6.QtCore import QAbstractTableModel, Qt
 
-from domain.entities import EquipmentEntity, EquipmentPortEntity
+from live_line_builder.domain.entities import EquipmentEntity, EquipmentPortEntity
 
 """
 ここのモデルは機器の情報であってライブでどのように接続するかの情報でない。
