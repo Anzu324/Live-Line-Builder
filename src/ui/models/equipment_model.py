@@ -21,14 +21,14 @@ class EquipmentModel(QAbstractTableModel):
     # 必須: 列数を返す
     def columnCount(self, parent=None):
         if self._data:
-            return len(self._data[0])
+            return self._data.column_size()
         return 0
 
     # 必須: データを返す
     def data(self, index, role: int = Qt.ItemDataRole.DisplayRole):
         # DisplayRoleは「画面に文字として表示するためのデータ」を要求された時
         if role == Qt.ItemDataRole.DisplayRole:
-            return str(self._data[index.row()][index.column()])
+            return str(self._data[index.row(), index.column()])
         return None
 
     def headerData(self, section, orientation, role: int = Qt.ItemDataRole.DisplayRole):
@@ -56,7 +56,7 @@ class EquipmentModel(QAbstractTableModel):
         return False
 
     # 独自メソッド
-    def get_product_at(self, row: int) -> list[str] | None:
+    def get_product_at(self, row: int) -> dict[str, str] | None:
         """指定した行のデータ（辞書）をそのまま返すヘルパーメソッド"""
         if 0 <= row < len(self._data):
             return self._data[row]
@@ -83,7 +83,7 @@ class EquipmentPortModel(QAbstractTableModel):
     def data(self, index, role: int = Qt.ItemDataRole.DisplayRole):
         # DisplayRoleは「画面に文字として表示するためのデータ」を要求された時
         if role == Qt.ItemDataRole.DisplayRole:
-            return str(self._data[index.row()][index.column()])
+            return str(self._data[index.row(), index.column()])
         return None
 
     def headerData(self, section, orientation, role: int = Qt.ItemDataRole.DisplayRole):
@@ -104,7 +104,7 @@ class EquipmentPortModel(QAbstractTableModel):
     def setData(self, index, value, role: int = Qt.ItemDataRole.EditRole):
         if role == Qt.ItemDataRole.EditRole:
             # 入力されたvalueをデータに反映
-            self._data[index.row()][index.column()] = value
+            self._data[index.row(), index.column()] = value
             # データが変更されたことをViewに通知（これがないと画面が更新されない）
             self.dataChanged.emit(index, index)
             return True

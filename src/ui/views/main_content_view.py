@@ -40,10 +40,10 @@ class MainContentView(QWidget):
             proxy_model.setSourceModel(connector_model)  # 元のModelをセット
             if i := equipment_model.get_product_at(x):
                 print(
-                    f"Creating table for equipment ID: {x}:{i[0]}"
+                    f"Creating table for equipment ID: {x}:{i['name']}"
                 )  # デバッグ用の出力
                 proxy_model.set_filter_condition(
-                    0, str(i[0])
+                    0, str(i["equip_id"])
                 )  # フィルター対象の列と値を指定
 
             if proxy_model.rowCount() == 0:

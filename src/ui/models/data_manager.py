@@ -2,6 +2,8 @@ from PySide6.QtCore import QObject
 
 from app_mock import mock_data
 from domain.entities import EquipmentEntity, EquipmentPortEntity
+from domain.entities.columns import EQUIPMENT_COLUMNS, EQUIPMENT_PORT_COLUMNS
+from domain.entities.table_entity import zip_column_key_and_table
 
 
 class DataManager(QObject):
@@ -20,9 +22,16 @@ class DataManager(QObject):
     ) -> None:
         # 親クラスのQObjectのご加護を得る
         super().__init__(parent)
-
-        self._equipment_entity = EquipmentEntity(equipment_list)
-        self._equipment_port_entity = EquipmentPortEntity(equipment_ports)
+        temp = [i.key for i in EQUIPMENT_COLUMNS]
+        if not (equipment_list is None):
+            self._equipment_entity = EquipmentEntity(
+                zip_column_key_and_table(temp, equipment_list)
+            )
+        temp = [i.key for i in EQUIPMENT_PORT_COLUMNS]
+        if not (equipment_ports is None):
+            self._equipment_port_entity = EquipmentPortEntity(
+                zip_column_key_and_table(temp, equipment_ports)
+            )
 
     # モックでデータマネージャーを構築する
     @staticmethod
