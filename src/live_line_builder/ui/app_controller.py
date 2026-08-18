@@ -3,6 +3,7 @@ from PySide6.QtCore import QObject, Signal
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import PerformanceEntity, ProjectDataEntity
 from live_line_builder.ui.models import DataManager, EquipmentModel, EquipmentPortModel
+from live_line_builder.ui.views import MainContentView, MainWindow
 
 
 # ★ QObject を継承する
@@ -39,6 +40,18 @@ class AppController(QObject):
         self._equipment_ports = EquipmentPortModel(
             self._data_mangeger.equipment_port_entity
         )
+
+        self.central_widget = MainContentView(
+            self._equipments,
+            self._equipment_ports,
+            [1, 2],  # 例: 列0と列1をフィルター対象とする
+        )  # メインコンテンツビューの作成
+
+        self.main_window = (
+            MainWindow()
+        )  # selfをつけ生存期間をAppCOntorollerと同等に延長
+        self.main_window.set_central_widget(self.central_widget)  # 埋め込み
+        self.main_window.show()  # 表示
 
     # モックでデータマネージャーを構築する
     @staticmethod

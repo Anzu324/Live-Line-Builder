@@ -4,8 +4,6 @@ from live_line_builder.ui.views.main_content_view import (
     MainContentView,  # メインコンテンツビューをインポート
 )
 
-from .app_controller import AppController  # モデルをインポート
-
 
 # メインウィンドウのクラス
 class MainWindow(QWidget):
@@ -31,32 +29,20 @@ class MainWindow(QWidget):
         self.button.setText("Click Me")  # ボタンのテキストを設定
         self.button.show()
 
-        scroll_area = QScrollArea()
+        self.scroll_area = QScrollArea()
 
         # 中身のウィジェットをスクロールエリアの幅に自動フィットさせる
-        scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidgetResizable(True)
 
         # 【オプション】潰れすぎ防止：最低でも「幅250px / 高さ200px」は確保する
-        scroll_area.setMinimumSize(250, 200)
-
-        # ----------------------------------
-        # データマネージャーを用意
-        # ----------------------------------
-        self.data_manager = AppController.factory_by_mock()
-
-        # EquipmentModelのインスタンスを作成
-        equipment_data = self.data_manager.equipments
-
-        # コネクタのデータを保持するEquipmentConnectorModelのインスタンスを作成
-        connector_data = self.data_manager.equipment_ports
-
-        self.central_widget = MainContentView(
-            equipment_data,
-            connector_data,
-            [1, 2],  # 例: 列0と列1をフィルター対象とする
-        )  # メインコンテンツビューの作成
-        scroll_area.setWidget(self.central_widget)
+        self.scroll_area.setMinimumSize(250, 200)
 
         self.v_layout.addWidget(self.label)  # レイアウトにラベルを追加
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
-        self.v_layout.addWidget(scroll_area)  # レイアウトにメインコンテンツビューを追加
+        self.v_layout.addWidget(
+            self.scroll_area
+        )  # レイアウトにメインコンテンツビューを追加
+
+    def set_central_widget(self, widget: MainContentView):
+        self.central_widget = widget
+        self.scroll_area.setWidget(self.central_widget)
