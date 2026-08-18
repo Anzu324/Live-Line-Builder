@@ -10,6 +10,8 @@ class EquipmentTableView(QWidget):
 
         title_label = QLabel(title)  # タイトルラベルを作成
 
+        self._model = source_model
+
         self.view = QTableView(self)  # QTableViewのインスタンスを作成
         self.view.setModel(source_model)
         self.view.resize(600, 500)
@@ -43,3 +45,7 @@ class EquipmentTableView(QWidget):
 
         # スクロールバーが出ない最小サイズとして設定
         self.view.setMinimumHeight(h)
+
+    def set_model_of_table(self, source_model: QAbstractItemModel):
+        self._model = source_model
+        self.view.setModel(source_model)
