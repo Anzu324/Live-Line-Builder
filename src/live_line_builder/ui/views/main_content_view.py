@@ -1,9 +1,10 @@
-from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLineEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
 from live_line_builder.ui.models import EquipmentModel, EquipmentPortModel
 from live_line_builder.ui.models.proxies import (
     MultiFilterProxyModel,  # プロキシモデルをインポート
 )
+from live_line_builder.ui.views.live_info_view import LiveInfoView
 from live_line_builder.ui.views.table import (
     EquipmentTableView,  # テーブルビューをインポート
 )
@@ -24,14 +25,8 @@ class MainContentView(QWidget):
         self.h_layout = QHBoxLayout(self)  # 垂直方向のレイアウトを作成
 
         # ライブ情報エリア
-        formLayout = QFormLayout()
-        self.show_name = QLineEdit()
-        self.show_location = QLineEdit()
-        self.show_day = QLineEdit()
-        formLayout.addRow(self.tr("公演名"), self.show_name)
-        formLayout.addRow(self.tr("開場"), self.show_location)
-        formLayout.addRow(self.tr("日時"), self.show_day)
-        self.v_layout.addLayout(formLayout)
+        self.form = LiveInfoView()
+        self.v_layout.addWidget(self.form)
 
         # 回線エリア
         self.multi_column_layout = QVBoxLayout()  # マルチの列のレイアウトを作成

@@ -5,10 +5,10 @@ from live_line_builder.domain.entities import PerformanceEntity
 
 class PerformanceModel(QObject):
     data_changed = Signal()  # 引数なしの通知
-    _performance = PerformanceEntity()
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self._performance = PerformanceEntity()
 
     @property
     def name(self) -> str:

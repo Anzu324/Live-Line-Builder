@@ -20,16 +20,20 @@ class LiveInfoController(QObject):
         self.main_content_view.show_name.editingFinished.connect(
             self.on_show_name_editingFinished
         )
+        self.main_content_view.show_name.setText(self.performance_model.name)
+
         self.main_content_view.show_place.editingFinished.connect(
             self.on_show_place_editingFinished
         )
+        self.main_content_view.show_place.setText(self.performance_model.place)
+
         self.main_content_view.show_day.editingFinished.connect(
             self.on_show_day_editingFinished
         )
+        self.main_content_view.show_day.setText(self.performance_model.day)
 
     @Slot()
     def on_show_name_editingFinished(self):
-        print("Umakuitteru")
         self.performance_model.name = self.main_content_view.show_name.text()
 
     @Slot()

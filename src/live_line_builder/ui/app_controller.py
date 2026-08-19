@@ -1,8 +1,14 @@
 from PySide6.QtCore import QObject, Signal
 
 from live_line_builder.app_mock import mock_data
-from live_line_builder.domain.entities import PerformanceEntity, ProjectDataEntity
-from live_line_builder.ui.models import DataManager, EquipmentModel, EquipmentPortModel
+from live_line_builder.domain.entities import ProjectDataEntity
+from live_line_builder.ui.controllers import LiveInfoController
+from live_line_builder.ui.models import (
+    DataManager,
+    EquipmentModel,
+    EquipmentPortModel,
+    PerformanceModel,
+)
 from live_line_builder.ui.views import MainContentView, MainWindow
 
 
@@ -27,7 +33,7 @@ class AppController(QObject):
         super().__init__(parent)
 
         self.project_datum = ProjectDataEntity()
-        self.performance_data = [PerformanceEntity()]
+        self.performance_data = [PerformanceModel()]  # [PerformanceEntity()]
 
         self._data_mangeger = DataManager(
             self, equipment_list=equipment_list, equipment_ports=equipment_ports
@@ -52,6 +58,11 @@ class AppController(QObject):
         )  # selfをつけ生存期間をAppCOntorollerと同等に延長
         self.main_window.set_central_widget(self.central_widget)  # 埋め込み
         self.main_window.show()  # 表示
+
+        # ライブ情報表示の場所!
+        self.live_info_c = LiveInfoController(
+            self.central_widget.form, self.performance_data[0]
+        )
 
     # モックでデータマネージャーを構築する
     @staticmethod
