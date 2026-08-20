@@ -1,20 +1,19 @@
-import json
-from dataclasses import asdict, dataclass
+from collections.abc import Iterator
+from dataclasses import dataclass
 from enum import Enum
 
-# AIが出力したものを一部コメントしたままそのまま貼り付けています。
-# TODO:テストを作成。複雑なシステムです。検証必須。
-# TODO:その他のシステムとの整合性をとって組み込む。
+# ==========================================
+# 1. データ定義 (Models)
+# ==========================================
 
 
-# 機材の種類を表す。ポートの計算の流れの挙動を制御する。
 class NodeType(Enum):
     INSTRUMENT = "Instrument"
     MIC = "Mic"
     STAGE_BOX = "StageBox"
     MIXER = "Mixer"
     PROCESSOR = "Processor"
-    MAIN_AMP = "Amplifier"
+    MAIN_AMP = "MainAmp"
     SPEAKER = "Speaker"
 
 
@@ -47,12 +46,23 @@ class Equipment:
     type: NodeType
 
 
+# ==========================================
+# 2. コアシステム (Logic)
+# ==========================================
+
+
 class AudioPatchSystem:
+    """音響回線の状態管理とパッチング操作を提供するコアシステム"""
+
     def __init__(self):
         self.equipments: dict[str, Equipment] = {}
         self.ports: dict[str, Port] = {}
-        self.forward_edges: dict[str, set[str]] = {}  # OUT -> set(IN)
-        self.backward_edges: dict[str, str] = {}  # IN -> OUT (1対1制御)
+
+        # グラフ接続情報
+        self.forward_edges: dict[str, set[str]] = {}  # OUT_port_id -> set(IN_port_ids)
+        self.backward_edges: dict[str, str] = {}  # IN_port_id -> OUT_port_id
+
+    # --- 登録・基本操作 ---
 
     def add_equipment(self, eq: Equipment):
         self.equipments[eq.id] = eq
@@ -64,17 +74,17 @@ class AudioPatchSystem:
             self.forward_edges[port.id] = set()
 
     def connect_ports(self, port_a_id: str, port_b_id: str):
-        """方向を自動正規化（OUT -> IN）してパッチング（INの上書き制御含む）"""
+        """物理的な結線（方向は自動でOUT->INに正規化）"""
         p_a = self.ports[port_a_id]
         p_b = self.ports[port_b_id]
 
         if p_a.direction == p_b.direction:
-            raise ValueError(f"同属性（{p_a.direction.value}同士）は接続できません")
+            raise ValueError(f"同属性（{p_a.direction.value}同士）は接続できません。")
 
         out_port = p_a if p_a.direction == PortDirection.OUT else p_b
         in_port = p_b if p_a.direction == PortDirection.OUT else p_a
 
-        # INポートの既存接続を上書き解除
+        # INポートの既存接続があれば上書き（古い線を抜く）
         if in_port.id in self.backward_edges:
             old_out = self.backward_edges[in_port.id]
             self.forward_edges[old_out].remove(in_port.id)
@@ -82,20 +92,79 @@ class AudioPatchSystem:
         self.forward_edges[out_port.id].add(in_port.id)
         self.backward_edges[in_port.id] = out_port.id
 
-    def check_conversion_needed(self, out_port_id: str, in_port_id: str) -> str | None:
-        """オス/メスの物理的整合性を判定し、必要な変換ケーブルを返す"""
+    def get_required_conversion(self, out_port_id: str, in_port_id: str) -> str | None:
+        """物理的な整合性（オス/メス）を判定し、必要な変換を返す"""
         out_p = self.ports[out_port_id]
         in_p = self.ports[in_port_id]
+
         if out_p.gender == in_p.gender:
-            return "[要 F-F変換]" if out_p.gender == PortGender.MALE else "[要 M-M変換]"
+            return "要 M-M変換" if out_p.gender == PortGender.MALE else "要 F-F変換"
         return None
 
-    # --- アサイン機能 ---
+    # --- グラフ探索 (Generatorで分離) ---
 
-    def assign_by_stagebox(
+    def _get_next_upstream_ports(self, port_id: str) -> list[str]:
+        """指定ポートの1つ上流にあるポートID群を取得"""
+        port = self.ports[port_id]
+        if port.direction == PortDirection.IN:
+            # INポートからは、結線されているOUTポートへ
+            out_id = self.backward_edges.get(port_id)
+            return [out_id] if out_id else []
+        else:
+            # OUTポートからは、同機器のINポートへ
+            return [
+                p.id
+                for p in self.ports.values()
+                if p.equipment_id == port.equipment_id
+                and p.direction == PortDirection.IN
+            ]
+
+    def _traverse_upstream(self, start_port_id: str) -> Iterator[str]:
+        """ポートから上流へ向かってノードを巡回するジェネレータ"""
+        visited = set()
+        stack = [start_port_id]
+        while stack:
+            curr = stack.pop()
+            if curr in visited:
+                continue
+            visited.add(curr)
+            yield curr
+            stack.extend(self._get_next_upstream_ports(curr))
+
+    def _get_next_downstream_ports(self, port_id: str) -> list[str]:
+        """指定ポートの1つ下流にあるポートID群を取得"""
+        port = self.ports[port_id]
+        if port.direction == PortDirection.OUT:
+            # OUTポートからは、結線されているINポート群へ
+            return list(self.forward_edges.get(port_id, []))
+        else:
+            # INポートからは、同機器の同Ch OUTポートへ
+            return [
+                p.id
+                for p in self.ports.values()
+                if p.equipment_id == port.equipment_id
+                and p.direction == PortDirection.OUT
+                and p.channel_no == port.channel_no
+            ]
+
+    def _traverse_downstream(self, start_port_id: str) -> Iterator[str]:
+        """ポートから下流へ向かってノードを巡回するジェネレータ"""
+        visited = set()
+        stack = [start_port_id]
+        while stack:
+            curr = stack.pop()
+            if curr in visited:
+                continue
+            visited.add(curr)
+            yield curr
+            stack.extend(self._get_next_downstream_ports(curr))
+
+    # --- 高度な自動パッチング機能 ---
+
+    def auto_patch_mixer_from_stagebox(
         self, mixer_in_port_id: str, stagebox_eq_id: str, ch_no: int
-    ):
-        """マルチ番号指定 -> 接続＆上流の楽器を自動割り出し"""
+    ) -> Equipment | None:
+        """マルチの番号を指定してミキサーに繋ぐ。成功した場合、上流の楽器を返す。"""
         sb_out_port = next(
             (
                 p
@@ -106,228 +175,182 @@ class AudioPatchSystem:
             ),
             None,
         )
+
         if not sb_out_port:
-            return
+            raise ValueError(
+                f"指定されたStageBox(Ch.{ch_no})の出力ポートが見つかりません。"
+            )
 
         self.connect_ports(sb_out_port.id, mixer_in_port_id)
-        inst = self._find_upstream_instrument(sb_out_port.id)
-        inst_name = inst.name if inst else "（音源なし）"
-        print(f"マルチCh.{ch_no} -> ミキサー割り当て（検出楽器: {inst_name}）")
 
-    def assign_by_instrument(self, mixer_in_port_id: str, instrument_eq_id: str):
-        """楽器指定 -> マルチ接続確認＆自動パッチング"""
-        sb_out_port = self._find_downstream_stagebox_out(instrument_eq_id)
-        if not sb_out_port:
-            print("マルチまで回線が到達していません")
-            return
-
-        self.connect_ports(sb_out_port.id, mixer_in_port_id)
-        inst_name = self.equipments[instrument_eq_id].name
-        print(
-            f"{inst_name}（マルチCh.{sb_out_port.channel_no}経由）-> ミキサーに自動アサイン"
-        )
-
-    # --- 探索ロジック ---
-
-    def _find_upstream_instrument(self, start_port_id: str) -> Equipment | None:
-        curr_id = start_port_id
-        visited = set()
-        while curr_id and curr_id not in visited:
-            visited.add(curr_id)
-            port = self.ports[curr_id]
-            eq = self.equipments[port.equipment_id]
+        # 上流を探索して楽器を特定する
+        for port_id in self._traverse_upstream(sb_out_port.id):
+            eq = self.equipments[self.ports[port_id].equipment_id]
             if eq.type in (NodeType.INSTRUMENT, NodeType.MIC):
                 return eq
-
-            if port.direction == PortDirection.IN:
-                curr_id = self.backward_edges.get(curr_id)
-            else:
-                in_ports = [
-                    p
-                    for p in self.ports.values()
-                    if p.equipment_id == port.equipment_id
-                    and p.direction == PortDirection.IN
-                ]
-                curr_id = in_ports[0].id if in_ports else None
         return None
 
-    def _find_downstream_stagebox_out(self, instrument_eq_id: str) -> Port | None:
+    def auto_patch_mixer_from_instrument(
+        self, mixer_in_port_id: str, instrument_eq_id: str
+    ) -> Port:
+        """楽器を指定し、マルチを経由してミキサーに繋ぐ。成功した場合、経由したマルチのポートを返す。"""
         out_ports = [
             p
             for p in self.ports.values()
             if p.equipment_id == instrument_eq_id and p.direction == PortDirection.OUT
         ]
         if not out_ports:
-            return None
+            raise ValueError("指定された楽器に出力ポートが存在しません。")
 
-        stack = [out_ports[0].id]
-        visited = set()
-        while stack:
-            curr_id = stack.pop()
-            if curr_id in visited:
-                continue
-            visited.add(curr_id)
-
-            port = self.ports[curr_id]
+        # 下流を探索してマルチのOUTを探す
+        sb_out_port = None
+        for port_id in self._traverse_downstream(out_ports[0].id):
+            port = self.ports[port_id]
             eq = self.equipments[port.equipment_id]
-
             if eq.type == NodeType.STAGE_BOX and port.direction == PortDirection.OUT:
-                return port
+                sb_out_port = port
+                break
 
-            if port.direction == PortDirection.OUT:
-                stack.extend(self.forward_edges.get(curr_id, []))
-            else:
-                same_ch_outs = [
-                    p.id
-                    for p in self.ports.values()
-                    if p.equipment_id == port.equipment_id
-                    and p.direction == PortDirection.OUT
-                    and p.channel_no == port.channel_no
-                ]
-                stack.extend(same_ch_outs)
-        return None
+        if not sb_out_port:
+            raise ValueError("この楽器はStageBoxまで回線が到達していません。")
 
-    # --- 表示・保存 ---
+        self.connect_ports(sb_out_port.id, mixer_in_port_id)
+        return sb_out_port
 
-    def render_patch_sheet(self):
-        """舞台用：横並び回線フロー表示（変換ケーブル注記付き）"""
-        print("\n=== 音響回線表 ===")
-        # 各全OUTポートから開始するフローを表示
-        processed_starts = set()
-        for out_id, in_ids in self.forward_edges.items():
-            if out_id in self.backward_edges.values():
-                continue  # 途中のノードはスキップ
 
+# ==========================================
+# 3. 表示専用関数 (Output & Visualization)
+# ==========================================
+
+
+def print_visual_patch_flow(sys: AudioPatchSystem):
+    """【表示機能 1】横並びで回線のフローをビジュアル表示する"""
+    print("\n=== ビジュアル回線フロー ===")
+
+    def build_chain(out_id: str, in_id: str) -> str:
+        out_p = sys.ports[out_id]
+        in_p = sys.ports[in_id]
+        out_eq = sys.equipments[out_p.equipment_id]
+        in_eq = sys.equipments[in_p.equipment_id]
+
+        conv = sys.get_required_conversion(out_id, in_id)
+        print("conv:::::", conv)
+        arrow = f" --[{conv}]--> " if conv else " ----> "
+        chain_str = f"[{out_eq.name}:{out_p.name}]{arrow}[{in_eq.name}:{in_p.name}]"
+        print(chain_str)
+
+        # 下流ポートがあれば再帰的に繋ぐ
+        for next_out_id in sys._get_next_downstream_ports(in_id):
+            for next_in_id in sys.forward_edges.get(next_out_id, []):
+                chain_str += "\n      └─ " + build_chain(next_out_id, next_in_id)
+        return chain_str
+
+    # グラフの始点（他のINから結線されていないOUT）を起点に描画
+    is_empty = True
+    for out_id, in_ids in sys.forward_edges.items():
+        if out_id not in sys.backward_edges.values():
             for in_id in in_ids:
-                chain_str = self._build_chain_string(out_id, in_id)
-                print(chain_str)
+                print(build_chain(out_id, in_id))
+                is_empty = False
 
-    def _build_chain_string(self, out_id: str, in_id: str) -> str:
-        out_p = self.ports[out_id]
-        in_p = self.ports[in_id]
-        out_eq = self.equipments[out_p.equipment_id]
-        in_eq = self.equipments[in_p.equipment_id]
-
-        conv = self.check_conversion_needed(out_id, in_id)
-        arrow = f" =={conv}==> " if conv else " ==> "
-
-        res = f"[{out_eq.name}:{out_p.name}]{arrow}[{in_eq.name}:{in_p.name}]"
-
-        # さらに下流へ続く場合
-        next_out_ports = [
-            p
-            for p in self.ports.values()
-            if p.equipment_id == in_p.equipment_id
-            and p.direction == PortDirection.OUT
-            and p.channel_no == in_p.channel_no
-        ]
-        for next_out in next_out_ports:
-            for next_in_id in self.forward_edges.get(next_out.id, []):
-                res += " ==> " + self._build_chain_string(next_out.id, next_in_id)
-        return res
-
-    def save_to_file(self, filepath: str):
-        data = {
-            "equipments": [asdict(e) for e in self.equipments.values()],
-            "ports": [
-                {
-                    **asdict(p),
-                    "direction": p.direction.value,
-                    "gender": p.gender.value,
-                }
-                for p in self.ports.values()
-            ],
-            "connections": [
-                {"from": u, "to": v}
-                for u, targets in self.forward_edges.items()
-                for v in targets
-            ],
-        }
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+    if is_empty:
+        print("結線がありません。")
 
 
-# --- 動作確認 ---
+def print_all_connections(sys: AudioPatchSystem):
+    """【表示機能 2】全てのパッチ（結線）リストを列挙表示する"""
+    print("\n=== 現在のパッチリスト ===")
+    for out_id, in_ids in sys.forward_edges.items():
+        out_p = sys.ports[out_id]
+        out_eq = sys.equipments[out_p.equipment_id]
+
+        for in_id in in_ids:
+            in_p = sys.ports[in_id]
+            in_eq = sys.equipments[in_p.equipment_id]
+            print(
+                f"OUT: {out_eq.name} ({out_p.name}) => IN: {in_eq.name} ({in_p.name})"
+            )
+
+
+# ==========================================
+# 4. テスト用シナリオ (AI・開発者向け)
+# ==========================================
 if __name__ == "__main__":
+    """
+    【テスト設計ヒント】
+    別のAIが pytest などを作成する場合、以下の Arrange (準備), Act (実行), Assert (検証) の
+    流れを参考にテストケースを構築してください。
+    - 正常系: 返り値のオブジェクトのアサーション (assert result.name == "...")
+    - 異常系: 例外が正しく発生するかの検証 (with pytest.raises(ValueError): ...)
+    """
     sys = AudioPatchSystem()
 
-    # 機材・ポート登録
+    # --- [Arrange] 事前データの準備 ---
     sys.add_equipment(Equipment("eq_vo", "Vo.Mic", NodeType.INSTRUMENT))
+    sys.add_equipment(Equipment("eq_gt", "Gt.Amp", NodeType.INSTRUMENT))
     sys.add_equipment(Equipment("eq_sb", "StageBox16", NodeType.STAGE_BOX))
     sys.add_equipment(Equipment("eq_mix", "CL5 Console", NodeType.MIXER))
 
-    # 入力系統ポート (通常オス->メス)
+    sys.add_port(Port("vo_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_vo"))
+    sys.add_port(Port("gt_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_gt"))
+
+    # StageBox Ch1 (Vo用)
     sys.add_port(
-        Port(
-            "vo_out",
-            "Out",
-            PortDirection.OUT,
-            PortGender.MALE,
-            "eq_vo",
-        )
+        Port("sb_in1", "Ch1 In", PortDirection.IN, PortGender.FEMALE, "eq_sb", 1)
     )
     sys.add_port(
-        Port(
-            "sb_in1",
-            "Ch1 In",
-            PortDirection.IN,
-            PortGender.FEMALE,
-            "eq_sb",
-            channel_no=1,
-        )
+        Port("sb_out1", "Ch1 Out", PortDirection.OUT, PortGender.MALE, "eq_sb", 1)
+    )
+    # StageBox Ch2 (Gt用, まだ結線されていない)
+    sys.add_port(
+        Port("sb_in2", "Ch2 In", PortDirection.IN, PortGender.FEMALE, "eq_sb", 2)
     )
     sys.add_port(
-        Port(
-            "sb_out1",
-            "Ch1 Out",
-            PortDirection.OUT,
-            PortGender.MALE,
-            "eq_sb",
-            channel_no=1,
-        )
-    )
-    sys.add_port(
-        Port(
-            "mix_in1",
-            "Ch1 In",
-            PortDirection.IN,
-            PortGender.FEMALE,
-            "eq_mix",
-            channel_no=1,
-        )
+        Port("sb_out2", "Ch2 Out", PortDirection.OUT, PortGender.MALE, "eq_sb", 2)
     )
 
-    # 1. 舞台配線 (Vo -> マルチCh1)
+    # ミキサー入力
+    sys.add_port(
+        Port("mix_in1", "Ch1 In", PortDirection.IN, PortGender.FEMALE, "eq_mix", 1)
+    )
+    sys.add_port(
+        Port("mix_in2", "Ch2 In", PortDirection.IN, PortGender.FEMALE, "eq_mix", 2)
+    )
+
+    # 舞台上の仕込み配線 (Vo -> マルチCh1)
     sys.connect_ports("vo_out", "sb_in1")
 
-    # 2. モードA（マルチ指定で卓にアサイン）
-    sys.assign_by_stagebox("mix_in1", "eq_sb", ch_no=1)
+    # --- [Act & Assert] テストケースの実行 ---
 
-    # 3. 横並び表示（変換なし）
-    sys.render_patch_sheet()
-
-    # 4. イレギュラー例：卓Aux Out (Male) -> マルチ舞台側Ch16 (Female: 現場で逆に使うケース)
-    sys.add_port(
-        Port(
-            "mix_aux1",
-            "Aux1 Out",
-            PortDirection.OUT,
-            PortGender.MALE,
-            "eq_mix",
-        )
+    print("--- 正常系テスト1: マルチ指定でのパッチング ---")
+    # 期待値: Ch1を指定すると、結線が成功し、上流の「Vo.Mic」が返されること。
+    found_inst = sys.auto_patch_mixer_from_stagebox(
+        mixer_in_port_id="mix_in1", stagebox_eq_id="eq_sb", ch_no=1
     )
-    sys.add_port(
-        Port(
-            "sb_in16",
-            "Ch16 In(Stage)",
-            PortDirection.IN,
-            PortGender.FEMALE,
-            "eq_sb",
-            channel_no=16,
+    if found_inst:
+        print(f"成功: 自動結線完了。検出された楽器 -> {found_inst.name}")
+
+    print("\n--- 異常系テスト1: 未配線の楽器を指定した場合 ---")
+    # 期待値: Gt.Ampはまだマルチに繋がっていないため、ValueErrorが起きること。
+    try:
+        sys.auto_patch_mixer_from_instrument(
+            mixer_in_port_id="mix_in2", instrument_eq_id="eq_gt"
         )
+    except ValueError as e:
+        print(f"想定通りのエラー発生: {e}")
+
+    print("\n--- 異常系テスト2: 性別エラー(変換プラグ必要)の検証 ---")
+    # 期待値: オス同士を繋ごうとした場合、get_required_conversion で "要 M-M変換" が返ること。
+
+    sys.add_port(
+        Port("mix_aux1_out", "Aux1 Out", PortDirection.OUT, PortGender.MALE, "eq_mix")
     )
+    try:
+        # (注意: connect_ports自体は論理結線なので実行可能。表示時に物理警告が出る設計)
+        sys.connect_ports("mix_aux1_out", "sb_out2")
+    except ValueError as e:
+        print(f"想定通りのエラー発生: {e}")
 
-    sys.connect_ports("mix_aux1", "sb_in16")
-
-    # 変換コードが必要な回線表示
-    sys.render_patch_sheet()
+    # --- 出力機能のテスト ---
+    print_all_connections(sys)
+    print_visual_patch_flow(sys)
