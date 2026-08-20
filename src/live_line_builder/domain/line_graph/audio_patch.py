@@ -9,7 +9,7 @@ from enum import Enum
 
 class NodeType(Enum):
     INSTRUMENT = "Instrument"
-    MIC = "Mic"
+    MIC = "Microphone"
     STAGE_BOX = "StageBox"
     MIXER = "Mixer"
     PROCESSOR = "Processor"
