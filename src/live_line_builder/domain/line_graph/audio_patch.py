@@ -234,10 +234,8 @@ def print_visual_patch_flow(sys: AudioPatchSystem):
         in_eq = sys.equipments[in_p.equipment_id]
 
         conv = sys.get_required_conversion(out_id, in_id)
-        print("conv:::::", conv)
         arrow = f" --[{conv}]--> " if conv else " ----> "
         chain_str = f"[{out_eq.name}:{out_p.name}]{arrow}[{in_eq.name}:{in_p.name}]"
-        print(chain_str)
 
         # 下流ポートがあれば再帰的に繋ぐ
         for next_out_id in sys._get_next_downstream_ports(in_id):
@@ -245,10 +243,10 @@ def print_visual_patch_flow(sys: AudioPatchSystem):
                 chain_str += "\n      └─ " + build_chain(next_out_id, next_in_id)
         return chain_str
 
-    # グラフの始点（他のINから結線されていないOUT）を起点に描画
     is_empty = True
     for out_id, in_ids in sys.forward_edges.items():
-        if out_id not in sys.backward_edges.values():
+        # 【修正点】同機器内に上流INポートを持たないOUTポート（＝マイク・楽器など最上流）を起点にする
+        if not sys._get_next_upstream_ports(out_id):
             for in_id in in_ids:
                 print(build_chain(out_id, in_id))
                 is_empty = False
