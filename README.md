@@ -3,6 +3,9 @@
 Excelで音響回線表(仕込み図)作ると開発環境と運用環境が混ざるという欠点があるためストレスがたまるし、引継ぎが難しい。
 そうであれば自作アプリを作ってしまおうという寸法である。
 
+# 制作方針
+GitHub初心者。PythonでGUIアプリ作成が初。であるので、私からは示せない。
+
 # 詳細(拙速だが作り途中)
 [パッケージの分類方針](https://github.com/Anzu324/Live-Line-Builder/blob/main/docs/design-strategy/role-of-packages.md)
 
