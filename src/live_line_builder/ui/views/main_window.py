@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QPushButton, QScrollArea, QTabWidget, QVBoxLayout, QWidget
 
 from live_line_builder.ui.views.main_content_view import (
     MainContentView,  # メインコンテンツビューをインポート
@@ -21,13 +21,11 @@ class MainWindow(QWidget):
         self.v_layout = QVBoxLayout(self)  # 垂直方向のレイアウトを作成
 
         # ウィジェットの作成と配置
-        self.label = QLabel(self)
-        self.label.setText("Hello World")  # ラベルのテキストを設定
-        self.label.show()
-
         self.button = QPushButton(self)  # ボタンの作成
         self.button.setText("Click Me")  # ボタンのテキストを設定
         self.button.show()
+
+        self.tabs = QTabWidget()
 
         self.scroll_area = QScrollArea()
 
@@ -36,12 +34,10 @@ class MainWindow(QWidget):
 
         # 【オプション】潰れすぎ防止：最低でも「幅250px / 高さ200px」は確保する
         self.scroll_area.setMinimumSize(250, 200)
+        self.tabs.addTab(self.scroll_area, "1Day")
 
-        self.v_layout.addWidget(self.label)  # レイアウトにラベルを追加
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
-        self.v_layout.addWidget(
-            self.scroll_area
-        )  # レイアウトにメインコンテンツビューを追加
+        self.v_layout.addWidget(self.tabs)  # レイアウトにメインコンテンツビューを追加
 
     def set_central_widget(self, widget: MainContentView):
         self.central_widget = widget
