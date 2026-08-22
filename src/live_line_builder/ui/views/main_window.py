@@ -42,3 +42,9 @@ class MainWindow(QWidget):
     def set_central_widget(self, widget: MainContentView):
         self.central_widget = widget
         self.scroll_area.setWidget(self.central_widget)
+
+    def set_tab(self, tabs: list[QWidget]):
+        self.tabs.clear()
+        for i in tabs:
+            self.scroll_area = QScrollArea()
+            self.tabs.addTab(i, "1Day")

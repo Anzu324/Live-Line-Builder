@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, Slot
 
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import ProjectDataEntity
@@ -33,7 +33,10 @@ class AppController(QObject):
         super().__init__(parent)
 
         self.project_datum = ProjectDataEntity()
-        self.performance_data = [PerformanceModel()]  # [PerformanceEntity()]
+        self.performance_data = [
+            PerformanceModel(),
+            PerformanceModel(),
+        ]
 
         self._data_mangeger = DataManager(
             self, equipment_list=equipment_list, equipment_ports=equipment_ports
@@ -69,6 +72,10 @@ class AppController(QObject):
     def factory_by_mock() -> AppController:
         print("AppControllerのfactoryを呼んでいる。早めに移行せよ")
         return AppController(None, mock_data.equipment_data, mock_data.port_data)
+
+    @Slot()
+    def change_performance(self):
+        """公演を切り替える"""
 
     @property
     def equipments(self):

@@ -9,6 +9,7 @@ from live_line_builder.domain.entities.columns import (
 from live_line_builder.domain.entities.table_entity import zip_column_key_and_table
 
 
+# TODO:公演ごとにもろもろを切り替える処理
 class DataManager(QObject):
     """
     ModelやUIから呼び出され複数のエンティティ(ピュアなデータ)間の橋渡しを担う。
