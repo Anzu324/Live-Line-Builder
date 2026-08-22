@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QPushButton, QScrollArea, QTabWidget, QVBoxLayout, QWidget
 
-from live_line_builder.ui.views.main_content_view import (
-    MainContentView,  # メインコンテンツビューをインポート
+from live_line_builder.ui.views.worksheet_view import (
+    WorkSheetView,  # メインコンテンツビューをインポート
 )
 
 
@@ -39,7 +39,7 @@ class MainWindow(QWidget):
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
         self.v_layout.addWidget(self.tabs)  # レイアウトにメインコンテンツビューを追加
 
-    def set_central_widget(self, widget: MainContentView):
+    def set_central_widget(self, widget: WorkSheetView):
         self.central_widget = widget
         self.scroll_area.setWidget(self.central_widget)
 

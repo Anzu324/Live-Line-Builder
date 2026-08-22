@@ -9,7 +9,7 @@ from live_line_builder.ui.models import (
     EquipmentPortModel,
     PerformanceModel,
 )
-from live_line_builder.ui.views import MainContentView, MainWindow
+from live_line_builder.ui.views import MainWindow, WorkSheetView
 
 
 # ★ QObject を継承する
@@ -50,7 +50,7 @@ class AppController(QObject):
             self._data_mangeger.equipment_port_entity
         )
 
-        self.central_widget = MainContentView(
+        self.central_widget = WorkSheetView(
             self._equipments,
             self._equipment_ports,
             [1, 2],  # 例: 列0と列1をフィルター対象とする

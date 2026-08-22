@@ -12,7 +12,7 @@ from live_line_builder.ui.views.table import (
 
 # メインコンテンツビューのクラス
 # メインコンテンツビューとは、中央にある、図や表を表示する為のウィジェットです。
-class MainContentView(QWidget):
+class WorkSheetView(QWidget):
     def __init__(
         self,
         equipment_model: EquipmentModel,
