@@ -27,24 +27,21 @@ class MainWindow(QWidget):
 
         self.tabs = QTabWidget()
 
-        self.scroll_area = QScrollArea()
-
-        # 中身のウィジェットをスクロールエリアの幅に自動フィットさせる
-        self.scroll_area.setWidgetResizable(True)
-
-        # 【オプション】潰れすぎ防止：最低でも「幅250px / 高さ200px」は確保する
-        self.scroll_area.setMinimumSize(250, 200)
-        self.tabs.addTab(self.scroll_area, "1Day")
-
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
         self.v_layout.addWidget(self.tabs)  # レイアウトにメインコンテンツビューを追加
 
     def set_central_widget(self, widget: WorkSheetView):
-        self.central_widget = widget
-        self.scroll_area.setWidget(self.central_widget)
+        self.set_tabs([widget])
+        # self.scroll_area.setWidget(self.central_widget)
 
-    def set_tab(self, tabs: list[QWidget]):
+    def set_tabs(self, tabs_source: list[WorkSheetView]):
         self.tabs.clear()
-        for i in tabs:
-            self.scroll_area = QScrollArea()
-            self.tabs.addTab(i, "1Day")
+        for i in tabs_source:
+            scroll_area = QScrollArea()
+            # 中身のウィジェットをスクロールエリアの幅に自動フィットさせる
+            scroll_area.setWidgetResizable(True)
+            # 【オプション】潰れすぎ防止：最低でも「幅250px / 高さ200px」は確保する
+            scroll_area.setMinimumSize(250, 200)
+
+            scroll_area.setWidget(i)
+            self.tabs.addTab(scroll_area, "1Day")
