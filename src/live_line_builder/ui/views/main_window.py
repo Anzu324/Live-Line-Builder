@@ -1,4 +1,11 @@
-from PySide6.QtWidgets import QPushButton, QScrollArea, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QFrame,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from live_line_builder.ui.views.worksheet_view import (
     WorkSheetView,  # メインコンテンツビューをインポート
@@ -26,6 +33,7 @@ class MainWindow(QWidget):
         self.button.show()
 
         self.tabs = QTabWidget()
+        self.tabs.setContentsMargins(0, 0, 0, 0)
 
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
         self.v_layout.addWidget(self.tabs)  # レイアウトにメインコンテンツビューを追加
@@ -38,6 +46,7 @@ class MainWindow(QWidget):
         self.tabs.clear()
         for i in tabs_source:
             scroll_area = QScrollArea()
+            scroll_area.setFrameShape(QFrame.Shape.NoFrame)
             # 中身のウィジェットをスクロールエリアの幅に自動フィットさせる
             scroll_area.setWidgetResizable(True)
             # 【オプション】潰れすぎ防止：最低でも「幅250px / 高さ200px」は確保する
