@@ -3,7 +3,7 @@ from .table_entity import Column
 EQUIPMENT_COLUMNS = [
     Column(key="equip_id", header="EQUIPMENT", data_type=str, editable=False),
     Column(key="name", header="NAME", data_type=str),
-    Column(key="type", header="TYPE", data_type=str, default=100),
+    Column(key="equip_type", header="TYPE", data_type=str, default=100),
     Column(key="quantity", header="数量", data_type=str, default=100),
 ]
 
