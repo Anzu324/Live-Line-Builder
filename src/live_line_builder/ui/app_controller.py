@@ -58,22 +58,27 @@ class AppController(QObject):
             self._data_mangeger.equipment_port_entity
         )
 
-        self.central_widget = WorkSheetView(
-            self._equipments,
-            self._equipment_ports,
-            [1, 2],  # 例: 列0と列1をフィルター対象とする
-        )  # メインコンテンツビューの作成
+        self.central_widgets = [
+            WorkSheetView(
+                self._equipments,
+                self._equipment_ports,
+                [1, 2],  # 例: 列0と列1をフィルター対象とする
+            )
+            for _ in self.performance_data
+        ]  # メインコンテンツビューの作成
 
         self.main_window = (
             MainWindow()
         )  # selfをつけ生存期間をAppCOntorollerと同等に延長
-        self.main_window.set_central_widget(self.central_widget)  # 埋め込み
+
+        self.main_window.set_tabs(self.central_widgets)
         self.main_window.show()  # 表示
 
         # ライブ情報表示の場所!
-        self.live_info_c = LiveInfoController(
-            self.central_widget.form, self.performance_data[0]
-        )
+        self.live_info_c = [
+            LiveInfoController(i.form, j)
+            for (i, j) in zip(self.central_widgets, self.performance_data)
+        ]
 
     # モックでデータマネージャーを構築する
     @staticmethod
