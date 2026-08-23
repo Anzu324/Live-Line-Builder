@@ -4,11 +4,18 @@ from live_line_builder.domain.entities import PerformanceEntity
 
 
 class PerformanceModel(QObject):
+    """
+    ライブの各"公演"情報を保持するモデル。
+    """
+
     data_changed = Signal()  # 引数なしの通知
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None, entity: PerformanceEntity | None = None) -> None:
         super().__init__(parent)
-        self._performance = PerformanceEntity()
+        if entity is None:
+            self._performance = PerformanceEntity()
+        else:
+            self._performance = entity
 
     @property
     def name(self) -> str:

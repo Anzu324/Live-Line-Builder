@@ -9,6 +9,9 @@ from live_line_builder.ui.models import (
     EquipmentPortModel,
     PerformanceModel,
 )
+from live_line_builder.ui.models.data_manager import (
+    PerformanceGroup,  # 仮です。削除すること。
+)
 from live_line_builder.ui.views import MainWindow, WorkSheetView
 
 
@@ -33,14 +36,19 @@ class AppController(QObject):
         super().__init__(parent)
 
         self.project_datum = ProjectDataEntity()
-        self.performance_data = [
-            PerformanceModel(),
-            PerformanceModel(),
-        ]
 
         self._data_mangeger = DataManager(
             self, equipment_list=equipment_list, equipment_ports=equipment_ports
         )
+
+        # XXX:仮で無理矢理作ってます。
+        self._data_mangeger._performance_group_list = [
+            PerformanceGroup.make_default() for _ in range(4)
+        ]
+        self.performance_data = [
+            PerformanceModel(self, i._live_info)
+            for i in self._data_mangeger._performance_group_list
+        ]
 
         # 文字列で機器表を初期化する
         self._equipments = EquipmentModel(self._data_mangeger.equipment_entity)
