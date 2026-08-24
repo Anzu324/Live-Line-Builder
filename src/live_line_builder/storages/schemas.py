@@ -6,7 +6,7 @@ class EquipmentSchema(BaseModel):
     name: str
     equip_type: str
     quantity: int
-    ports_list: list[EquipmentPortSchema]
+    ports: list[EquipmentPortSchema]
 
 
 class EquipmentPortSchema(BaseModel):
@@ -17,7 +17,7 @@ class EquipmentPortSchema(BaseModel):
 
 
 class ProjectDataSchema(BaseModel):
-    parts: list[EquipmentSchema] = []
+    equipments: list[EquipmentSchema] = []
 
     # def to_part_table(self) -> PartTableEntity:
     #     # SchemaがEntityを生成して返す
