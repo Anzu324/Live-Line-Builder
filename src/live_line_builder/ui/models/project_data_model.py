@@ -18,6 +18,15 @@ class PerformanceModel(QObject):
             self._performance = entity
 
     @property
+    def tab_name(self) -> str:
+        return self._performance.tab_name
+
+    @tab_name.setter
+    def tab_name(self, value: str) -> None:
+        self._performance.tab_name = value
+        self.data_changed.emit()
+
+    @property
     def name(self) -> str:
         return self._performance.name
 
