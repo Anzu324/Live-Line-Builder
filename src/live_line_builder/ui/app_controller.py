@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, Signal, Slot
 
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import ProjectDataEntity
-from live_line_builder.ui.controllers import LiveInfoController
+from live_line_builder.ui.controllers import WorksheetController
 from live_line_builder.ui.models import (
     DataManager,
     EquipmentModel,
@@ -58,27 +58,27 @@ class AppController(QObject):
             self._data_mangeger.equipment_port_entity
         )
 
-        self.central_widgets = [
-            WorkSheetView(
-                self._equipments,
-                self._equipment_ports,
-                [1, 2],  # 例: 列0と列1をフィルター対象とする
-            )
-            for _ in self.performance_data
-        ]  # メインコンテンツビューの作成
-
         self.main_window = (
             MainWindow()
         )  # selfをつけ生存期間をAppCOntorollerと同等に延長
 
-        self.main_window.set_tabs(self.central_widgets)
         self.main_window.show()  # 表示
 
-        # ライブ情報表示の場所!
-        self.live_info_c = [
-            LiveInfoController(i.form, j)
-            for (i, j) in zip(self.central_widgets, self.performance_data)
-        ]
+        self.worksheet_widgets: list[WorkSheetView] = []
+        self.worksheet_ctrls: list[WorksheetController] = []
+        for model in self.performance_data:
+            view = WorkSheetView(
+                self._equipments,
+                self._equipment_ports,
+                [1, 2],  # 例: 列0と列1をフィルター対象とする
+                parent=self.main_window,
+            )
+            self.worksheet_widgets.append(view)
+            self.worksheet_ctrls.append(WorksheetController(view, model))
+
+        self.main_window.set_tabs(
+            self.worksheet_widgets, ["uuuu" for _ in self.worksheet_widgets]
+        )
 
     # モックでデータマネージャーを構築する
     @staticmethod

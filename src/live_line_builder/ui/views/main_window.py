@@ -42,9 +42,11 @@ class MainWindow(QWidget):
         self.set_tabs([widget])
         # self.scroll_area.setWidget(self.central_widget)
 
-    def set_tabs(self, tabs_source: list[WorkSheetView]):
+    def set_tabs(self, tabs_source: list[WorkSheetView], tab_names=None):
         self.tabs.clear()
-        for i in tabs_source:
+        if tab_names is None:
+            tab_names = ["" for i in tabs_source]
+        for i, j in zip(tabs_source, tab_names):
             scroll_area = QScrollArea()
             scroll_area.setFrameShape(QFrame.Shape.NoFrame)
             # 中身のウィジェットをスクロールエリアの幅に自動フィットさせる
@@ -53,4 +55,4 @@ class MainWindow(QWidget):
             scroll_area.setMinimumSize(250, 200)
 
             scroll_area.setWidget(i)
-            self.tabs.addTab(scroll_area, "1Day")
+            self.tabs.addTab(scroll_area, j)
