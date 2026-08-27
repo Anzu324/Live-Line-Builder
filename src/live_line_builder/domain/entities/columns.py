@@ -14,3 +14,11 @@ EQUIPMENT_PORT_COLUMNS = [
     Column(key="connerctor", header="CON", data_type=str, default=100),
     Column(key="flow", header="流れ", data_type=str, default=100),
 ]
+
+SETLIST_COLUMNS = [
+    Column(key="slot", header="SONG", data_type=str, editable=False),
+    Column(key="group", header="BAND", data_type=str, default=100),
+    Column(key="start", header="START", data_type=str),
+    Column(key="time", header="TIME", data_type=str, default=100),
+    Column(key="remark", header="REMARK", data_type=str, default=100),
+]

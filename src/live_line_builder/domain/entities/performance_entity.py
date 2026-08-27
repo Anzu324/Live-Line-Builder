@@ -1,3 +1,6 @@
+from .entity import SetListEntity
+
+
 class PerformanceEntity:
     """
     各公演ごとの基本情報を保持する
@@ -12,4 +15,5 @@ class PerformanceEntity:
     sound_operators: str = ""
 
     def __init__(self) -> None:
-        pass
+        self.setlist: SetListEntity = SetListEntity()
+        self.table_panels: list[list[int]] = []
