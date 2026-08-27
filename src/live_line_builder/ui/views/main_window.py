@@ -1,12 +1,6 @@
-from PySide6.QtWidgets import (
-    QFrame,
-    QPushButton,
-    QScrollArea,
-    QTabWidget,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QFrame, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
+from live_line_builder.ui.views.tabs import WorkSheetTabWidget
 from live_line_builder.ui.views.worksheet_view import (
     WorkSheetView,  # メインコンテンツビューをインポート
 )
@@ -32,7 +26,7 @@ class MainWindow(QWidget):
         self.button.setText("Click Me")  # ボタンのテキストを設定
         self.button.show()
 
-        self.tabs = QTabWidget()
+        self.tabs = WorkSheetTabWidget(self)
         self.tabs.setContentsMargins(0, 0, 0, 0)
 
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加

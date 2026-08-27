@@ -66,6 +66,7 @@ class AppController(QObject):
 
         self.worksheet_widgets: list[WorkSheetView] = []
         self.worksheet_ctrls: list[WorksheetController] = []
+        tab_names: list[str] = []
         for model in self.performance_data:
             view = WorkSheetView(
                 self._equipments,
@@ -75,9 +76,11 @@ class AppController(QObject):
             )
             self.worksheet_widgets.append(view)
             self.worksheet_ctrls.append(WorksheetController(view, model))
+            tab_names.append(model.tab_name)
 
         self.main_window.set_tabs(
-            self.worksheet_widgets, ["uuuu" for _ in self.worksheet_widgets]
+            self.worksheet_widgets,
+            tab_names,
         )
 
     # モックでデータマネージャーを構築する

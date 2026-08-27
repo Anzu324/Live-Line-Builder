@@ -1,7 +1,4 @@
-import sys
-
 from PySide6.QtWidgets import (
-    QApplication,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -13,8 +10,8 @@ from PySide6.QtWidgets import (
 
 
 class WorkSheetTabWidget(QTabWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
 
         # 1. ブラウザ風タブの基本設定
         # self.setTabsClosable(True)  # タブに「×（閉じる）」ボタンを表示
@@ -59,23 +56,3 @@ class WorkSheetTabWidget(QTabWidget):
         # 最後の1枚は閉じないように制限（または全て閉じたら新規タブ作成）
         if self.count() > 1:
             self.removeTab(index)
-
-
-class MainWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("ブラウザ風タブUI")
-        self.resize(800, 500)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)  # 外周の余白を詰める
-
-        self.tabs = WorkSheetTabWidget()
-        layout.addWidget(self.tabs)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
