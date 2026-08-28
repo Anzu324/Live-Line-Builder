@@ -35,7 +35,7 @@ class EquipmentModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 # 列のヘッダー
-                headers = ["ID", "NAME", "TYPE", "数量"]
+                headers = [i.header for i in self._data.columns]
                 return headers[section]
             if orientation == Qt.Orientation.Vertical:
                 # 行のヘッダー（1, 2, 3...と表示する場合）
@@ -90,7 +90,7 @@ class EquipmentPortModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 # 列のヘッダー
-                headers = ["EQUIPMENT", "NAME", "CONNECTOR", "IN/OUT"]
+                headers = [i.header for i in self._data.columns]
                 return headers[section]
             if orientation == Qt.Orientation.Vertical:
                 # 行のヘッダー（1, 2, 3...と表示する場合）
