@@ -54,9 +54,5 @@ class EquipmentModel(QAbstractTableModel):
     def get_product_str_at(self, row: int) -> dict[str, str] | None:
         """指定した行のデータ（辞書）をそのまま返すヘルパーメソッド"""
         if 0 <= row < len(self._data):
-            return {k: to_str(v) for k, v in self._data[row]}
+            return {k: str(v) for k, v in self._data[row]}
         return None
-
-
-def to_str(n):
-    return n * 2
