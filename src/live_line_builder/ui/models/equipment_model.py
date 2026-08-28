@@ -1,3 +1,5 @@
+from typing import Any
+
 from PySide6.QtCore import QAbstractTableModel, Qt
 
 from live_line_builder.domain.entities import EquipmentEntity, EquipmentPortEntity
@@ -56,7 +58,7 @@ class EquipmentModel(QAbstractTableModel):
         return False
 
     # 独自メソッド
-    def get_product_at(self, row: int) -> dict[str, str] | None:
+    def get_product_at(self, row: int) -> dict[str, Any] | None:
         """指定した行のデータ（辞書）をそのまま返すヘルパーメソッド"""
         if 0 <= row < len(self._data):
             return self._data[row]
