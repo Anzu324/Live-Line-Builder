@@ -30,5 +30,27 @@ dev = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
+
+[tool.mypy]
+python_version = "3.14" # 使用しているPythonバージョン
+warn_return_any = true
+warn_unused_configs = true
+
+# Pydantic 用プラグインの有効化
+plugins = [
+    "pydantic.mypy"
+]
+
+# Pydantic プラグインの細かな挙動設定（任意）
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[[tool.mypy.overrides]]
+module = "qdarktheme.*"
+ignore_missing_imports = true
+
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
