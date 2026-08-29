@@ -1,4 +1,18 @@
+from enum import Enum, auto
+
 from .entity import SetListEntity
+
+
+class TableViewType(Enum):
+    SETLIST = auto()
+    MULTI = auto()
+    MIXER_IN = auto()
+    MIXER_OUT = auto()
+
+
+class TableViewSelector:
+    view_type: TableViewType = TableViewType.SETLIST
+    id: int  # TODO 実装が定まっていない
 
 
 class PerformanceEntity:
@@ -16,4 +30,4 @@ class PerformanceEntity:
 
     def __init__(self) -> None:
         self.setlist: SetListEntity = SetListEntity()
-        self.table_panels: list[list[int]] = []
+        self.table_panels: list[list[TableViewSelector]] = []

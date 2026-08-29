@@ -19,14 +19,21 @@ def patch_system():
     sys = AudioPatchSystem()
 
     # --- [Arrange] 事前データの準備 ---
-    sys.add_equipment(Equipment("eq_vo", "Vo.Mic", NodeType.INSTRUMENT))
-    sys.add_equipment(Equipment("eq_gt", "Gt.Amp", NodeType.INSTRUMENT))
+    sys.add_equipment(Equipment("eq_vo", "Vo.Mic", NodeType.MIC))
+    sys.add_equipment(Equipment("eq_lg", "LG.Amp", NodeType.INSTRUMENT))
+    sys.add_equipment(Equipment("eq_lg_mic", "LG.Mic", NodeType.MIC))
     sys.add_equipment(Equipment("eq_sb", "StageBox16", NodeType.STAGE_BOX))
     sys.add_equipment(Equipment("eq_mix", "MG24/14FX Console", NodeType.MIXER))
 
-    # 楽器出力ポート
+    # 楽器ポート
     sys.add_port(Port("vo_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_vo"))
-    sys.add_port(Port("gt_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_gt"))
+    sys.add_port(Port("lg_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_lg"))
+    sys.add_port(
+        Port("lg_mic_in", "IN", PortDirection.IN, PortGender.FEMALE, "eq_lg_mic", 1)
+    )
+    sys.add_port(
+        Port("lg_mic_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_lg_mic", 1)
+    )
 
     # StageBox Ch1 (Vo用)
     sys.add_port(
@@ -87,7 +94,7 @@ def test_connect_ports_same_direction_error(patch_system):
     """同属性（OUT同士、IN同士）の接続でエラーが発生するか"""
     # OUT同士
     with pytest.raises(ValueError, match="同属性（OUT同士）は接続できません。"):
-        patch_system.connect_ports("vo_out", "gt_out")
+        patch_system.connect_ports("vo_out", "lg_out")
 
     # IN同士
     with pytest.raises(ValueError, match="同属性（IN同士）は接続できません。"):
@@ -101,13 +108,13 @@ def test_connect_ports_overwrite_existing(patch_system):
     assert "sb_in1" in patch_system.forward_edges["vo_out"]
 
     # 別の出力(Gt)を同じ入力(StageBox Ch1)に接続
-    patch_system.connect_ports("gt_out", "sb_in1")
+    patch_system.connect_ports("lg_out", "sb_in1")
 
     # 古い結線(Vo)から削除されていること
     assert "sb_in1" not in patch_system.forward_edges["vo_out"]
     # 新しい結線(Gt)が登録されていること
-    assert "sb_in1" in patch_system.forward_edges["gt_out"]
-    assert patch_system.backward_edges["sb_in1"] == "gt_out"
+    assert "sb_in1" in patch_system.forward_edges["lg_out"]
+    assert patch_system.backward_edges["sb_in1"] == "lg_out"
 
 
 def test_get_required_conversion(patch_system):
@@ -156,12 +163,12 @@ def test_auto_patch_mixer_from_stagebox_not_found(patch_system):
 
 def test_auto_patch_mixer_from_instrument_success(patch_system):
     """【正常系2】楽器指定による自動パッチングが成功するか"""
-    # [Arrange] 舞台上の仕込み配線 (Gt -> マルチCh2)
-    patch_system.connect_ports("gt_out", "sb_in2")
+    # [Arrange] 舞台上の仕込み配線 (LG -> マルチCh2)
+    patch_system.connect_ports("lg_out", "sb_in2")
 
-    # [Act] 楽器(Gt)を指定してミキサーにパッチング
+    # [Act] 楽器(LG)を指定してミキサーにパッチング
     sb_out_port = patch_system.auto_patch_mixer_from_instrument(
-        mixer_in_port_id="mix_in2", instrument_eq_id="eq_gt"
+        mixer_in_port_id="mix_in2", instrument_eq_id="eq_lg"
     )
 
     # [Assert] 経由したStageBoxの出力ポートが返却され、結線が完了していること
@@ -177,7 +184,7 @@ def test_auto_patch_mixer_from_instrument_not_connected(patch_system):
         ValueError, match="この楽器はStageBoxまで回線が到達していません。"
     ):
         patch_system.auto_patch_mixer_from_instrument(
-            mixer_in_port_id="mix_in2", instrument_eq_id="eq_gt"
+            mixer_in_port_id="mix_in2", instrument_eq_id="eq_lg"
         )
 
 
@@ -190,3 +197,25 @@ def test_auto_patch_mixer_from_instrument_no_out_ports(patch_system):
         patch_system.auto_patch_mixer_from_instrument(
             mixer_in_port_id="mix_in2", instrument_eq_id="eq_dummy"
         )
+
+
+def test_downstream_length(patch_system):
+    """入力側へたどった時の最深ノードまでの数を計算"""
+    patch_system.connect_ports("vo_out", "sb_in1")
+    patch_system.connect_ports("sb_out1", "mix_in1")
+    assert patch_system.get_upstream_length("mix_in1") == 4
+    # ("mix_in1", 1)
+    # ("sb_out1", 2)
+    # ("sb_in1", 3)
+    # ("vo_out", 4)
+    patch_system.connect_ports("lg_out", "lg_mic_in")
+    patch_system.connect_ports("lg_out", "lg_mic_in")
+    patch_system.connect_ports("lg_mic_out", "sb_in2")
+    patch_system.connect_ports("sb_out2", "mix_in2")
+    assert patch_system.get_upstream_length("mix_in2") == 6
+    # ("mix_in2", 1)
+    # ("sb_out2", 2)
+    # ("sb_in2", 3)
+    # ("lg_mic_out", 4)
+    # ("lg_mic_in", 5)
+    # ("lg_out", 6)

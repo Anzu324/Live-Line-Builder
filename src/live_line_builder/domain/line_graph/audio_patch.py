@@ -217,6 +217,27 @@ class AudioPatchSystem:
         self.connect_ports(sb_out_port.id, mixer_in_port_id)
         return sb_out_port
 
+    def get_upstream_length(self, start_port_id: str) -> int:
+        """ポート上流の最深数を取得する"""
+        visited = set()
+        stack: list[tuple[str, int]] = [(start_port_id, 1)]
+        max_length = 0
+
+        while stack:
+            curr = stack.pop()
+            if curr[0] in visited:
+                continue
+            visited.add(curr[0])
+            stack.extend(
+                [(i, curr[1] + 1) for i in self._get_next_upstream_ports(curr[0])]
+            )
+            print(curr)
+            if max_length <= curr[1]:
+                max_length = curr[1] + 1
+                # print(curr)
+
+        return max_length - 1
+
 
 # ==========================================
 # 3. 表示専用関数 (Output & Visualization)
