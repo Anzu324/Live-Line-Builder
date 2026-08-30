@@ -217,26 +217,32 @@ class AudioPatchSystem:
         self.connect_ports(sb_out_port.id, mixer_in_port_id)
         return sb_out_port
 
-    def get_upstream_length(self, start_port_id: str) -> int:
-        """ポート上流の最深数を取得する"""
-        visited = set()
-        stack: list[tuple[str, int]] = [(start_port_id, 1)]
+    def get_downstream_length(self, start_port_id: str) -> int:
+        # スタックには (現在のポートID, 現在の深さ, 現在の経路のセット) を入れる
+        stack = [(start_port_id, 0, {start_port_id})]
         max_length = 0
 
         while stack:
-            curr = stack.pop()
-            if curr[0] in visited:
-                continue
-            visited.add(curr[0])
-            stack.extend(
-                [(i, curr[1] + 1) for i in self._get_next_upstream_ports(curr[0])]
-            )
-            print(curr)
-            if max_length <= curr[1]:
-                max_length = curr[1] + 1
-                # print(curr)
+            curr_id, current_depth, current_path = stack.pop()
 
-        return max_length - 1
+            max_length = max(max_length, current_depth)
+
+            # 下流ポートを取得（スプリットにより複数ポートが返る想定）
+            downstream_ports = self._get_next_downstream_ports(curr_id)
+
+            for next_port in downstream_ports:
+                # 【重要】現在のルート内で既に通ったポートに再度到達したか（ループ検知）
+                if next_port in current_path:
+                    # 無限ループ（ハウリングの原因など）を防ぐため、このルートの探索は打ち切る
+                    # 必要に応じてここでログを出したり、例外を投げることも可能
+                    continue
+
+                # 現在のルート情報をコピーし、次のポートを加えてスタックに積む
+                new_path = current_path.copy()
+                new_path.add(next_port)
+                stack.append((next_port, current_depth + 1, new_path))
+
+        return max_length
 
 
 # ==========================================
