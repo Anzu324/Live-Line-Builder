@@ -72,10 +72,10 @@ class PerformanceModel(QObject):
         self.data_changed.emit()
 
     @property
-    def sound_operators(self) -> str:
-        return self._performance.sound_operators
+    def sound_crews(self) -> str:
+        return self._performance.sound_crews
 
-    @sound_operators.setter
-    def sound_operators(self, value: str) -> None:
-        self._performance.sound_operators = value
+    @sound_crews.setter
+    def sound_crews(self, value: str) -> None:
+        self._performance.sound_crews = value
         self.data_changed.emit()

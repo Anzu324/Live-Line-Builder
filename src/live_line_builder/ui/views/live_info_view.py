@@ -21,12 +21,12 @@ class LiveInfoView(QWidget):
         self.show_form_Layout.addRow(self.tr("日時"), self.show_day)
 
         self.crew_form_Layout = QFormLayout()
-        self.crew_stage_director = QLineEdit()
+        self.crew_live_director = QLineEdit()
         self.crew_sound_director = QLineEdit()
-        self.crew_sound_crew = QLineEdit()
-        self.crew_form_Layout.addRow(self.tr("舞台監督"), self.crew_stage_director)
+        self.crew_sound_crews = QLineEdit()
+        self.crew_form_Layout.addRow(self.tr("舞台監督"), self.crew_live_director)
         self.crew_form_Layout.addRow(self.tr("音響監督"), self.crew_sound_director)
-        self.crew_form_Layout.addRow(self.tr("音響"), self.crew_sound_crew)
+        self.crew_form_Layout.addRow(self.tr("音響"), self.crew_sound_crews)
 
         self.show_form_Layout.setContentsMargins(0, 0, 0, 0)
         self.show_form_Layout.setSpacing(5)  # レイアウトの余白を5に設定

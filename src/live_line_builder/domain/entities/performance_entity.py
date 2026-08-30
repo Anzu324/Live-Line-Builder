@@ -26,7 +26,7 @@ class PerformanceEntity:
     day: str = ""
     live_director: str = ""
     sound_director: str = ""
-    sound_operators: str = ""
+    sound_crews: str = ""
 
     def __init__(self) -> None:
         self.setlist: SetListEntity = SetListEntity()
