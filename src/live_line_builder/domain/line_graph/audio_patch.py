@@ -190,6 +190,28 @@ class AudioPatchSystem:
                 return eq
         return None
 
+    def get_upstream_length(self, start_port_id: str) -> int:
+        visited = set()
+        # 開始ポートの深さを 0 に設定
+        stack = [(start_port_id, 0)]
+        max_length = 0
+
+        while stack:
+            curr_id, current_depth = stack.pop()
+
+            if curr_id in visited:
+                continue
+            visited.add(curr_id)
+
+            # 探索した深さがこれまでの最大値を超えたら上書き更新
+            max_length = max(max_length, current_depth)
+
+            # 上流ノードを取得し、深さを +1 してスタックに追加
+            upstream_ports = self._get_next_upstream_ports(curr_id)
+            stack.extend([(port_id, current_depth + 1) for port_id in upstream_ports])
+
+        return max_length
+
     def auto_patch_mixer_from_instrument(
         self, mixer_in_port_id: str, instrument_eq_id: str
     ) -> Port:
