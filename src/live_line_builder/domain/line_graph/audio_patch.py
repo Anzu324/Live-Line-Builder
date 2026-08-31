@@ -62,6 +62,10 @@ class AudioPatchSystem:
         self.forward_edges: dict[str, set[str]] = {}  # OUT_port_id -> set(IN_port_ids)
         self.backward_edges: dict[str, str] = {}  # IN_port_id -> OUT_port_id
 
+    # --- 単純な内部補助関数 ---
+    def _get_equipment_id(self, port_id):
+        return self.equipments[self.ports[port_id].equipment_id]
+
     # --- 登録・基本操作 ---
 
     def add_equipment(self, eq: Equipment):
@@ -190,28 +194,6 @@ class AudioPatchSystem:
                 return eq
         return None
 
-    def get_upstream_length(self, start_port_id: str) -> int:
-        visited = set()
-        # 開始ポートの深さを 0 に設定
-        stack = [(start_port_id, 0)]
-        max_length = 0
-
-        while stack:
-            curr_id, current_depth = stack.pop()
-
-            if curr_id in visited:
-                continue
-            visited.add(curr_id)
-
-            # 探索した深さがこれまでの最大値を超えたら上書き更新
-            max_length = max(max_length, current_depth)
-
-            # 上流ノードを取得し、深さを +1 してスタックに追加
-            upstream_ports = self._get_next_upstream_ports(curr_id)
-            stack.extend([(port_id, current_depth + 1) for port_id in upstream_ports])
-
-        return max_length
-
     def auto_patch_mixer_from_instrument(
         self, mixer_in_port_id: str, instrument_eq_id: str
     ) -> Port:
@@ -239,6 +221,29 @@ class AudioPatchSystem:
         self.connect_ports(sb_out_port.id, mixer_in_port_id)
         return sb_out_port
 
+    # 長さ取得系関数
+    def get_upstream_length(self, start_port_id: str) -> int:
+        visited = set()
+        # 開始ポートの深さを 1 に設定
+        stack = [(start_port_id, 1)]
+        max_length = 0
+
+        while stack:
+            curr_id, current_depth = stack.pop()
+
+            if curr_id in visited:
+                continue
+            visited.add(curr_id)
+
+            # 探索した深さがこれまでの最大値を超えたら上書き更新
+            max_length = max(max_length, current_depth)
+
+            # 上流ノードを取得し、深さを +1 してスタックに追加
+            upstream_ports = self._get_next_upstream_ports(curr_id)
+            stack.extend([(port_id, current_depth + 1) for port_id in upstream_ports])
+
+        return max_length
+
     def get_downstream_length(self, start_port_id: str) -> int:
         # スタックには (現在のポートID, 現在の深さ, 現在の経路のセット) を入れる
         stack = [(start_port_id, 0, {start_port_id})]
@@ -265,6 +270,41 @@ class AudioPatchSystem:
                 stack.append((next_port, current_depth + 1, new_path))
 
         return max_length
+
+    def get_downstream_equipment_length(self, start_port_id: str) -> int:
+
+        # スタック: (現在のポートID, 経由した機材数, ループ検知用の通過済みポートセット)
+        # 開始時点で1台目の機材内にいるため、機材数は 1 とする
+        stack = [(start_port_id, 1, {start_port_id})]
+        max_eq_length = 0
+
+        while stack:
+            curr_port_id, current_eq_count, current_path = stack.pop()
+            curr_eq_id = self._get_equipment_id(curr_port_id)
+
+            # 最大機材経由数を更新
+            max_eq_length = max(max_eq_length, current_eq_count)
+
+            # 下流ポートを取得（ケーブルでの外部接続、または機材内部のルーティング）
+            downstream_ports = self._get_next_downstream_ports(curr_port_id)
+
+            for next_port_id in downstream_ports:
+                # 【重要】ループ検知は「機材」ではなく「ポート」単位で行う
+                if next_port_id in current_path:
+                    continue
+
+                next_eq_id = self._get_equipment_id(next_port_id)
+
+                # 2. 所属する機材が変わった場合のみ、カウントを増やす
+                next_eq_count = current_eq_count
+                if next_eq_id != curr_eq_id:
+                    next_eq_count += 1
+
+                new_path = current_path.copy()
+                new_path.add(next_port_id)
+                stack.append((next_port_id, next_eq_count, new_path))
+
+        return max_eq_length
 
 
 # ==========================================
