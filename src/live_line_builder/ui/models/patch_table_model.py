@@ -9,26 +9,35 @@ from live_line_builder.domain.line_graph import AudioPatchSystem
 
 
 # 各機材の情報を保持するモデルクラス
-class EquipmentModel(QAbstractTableModel):
+class PatchTableModel(QAbstractTableModel):
     def __init__(self, data: AudioPatchSystem, base_point_id: str, parent=None):
         super().__init__(parent)
         self._data = data  # 2次元リストなどのデータを保持
-        self._base_point_id = base_point_id  # 基点となる機材のID
+        self._base_point_equipment_id = base_point_id  # 基点となる機材のID
 
     # 必須: 行数を返す
     def rowCount(self, parent=None):
         filtered_dict = {
             k: v
             for k, v in self._data.ports.items()
-            if v.equipment_id == self._base_point_id
+            if v.equipment_id == self._base_point_equipment_id
         }
         return len(filtered_dict)
 
     # 必須: 列数を返す
     def columnCount(self, parent=None):
-        if self._data:
-            return self._data.get_upstream_length(self._base_point_id)
-        return 0
+        if self._data is None:
+            return 0
+        target_ports = [
+            i.id
+            for i in self._data.ports.values()
+            if i.equipment_id == self._base_point_equipment_id
+        ]
+        max_length = 0
+        for i in target_ports:
+            stream_length = self._data.get_upstream_length(i)
+            max_length = max(max_length, stream_length)
+        return max_length * 3
 
     # 必須: データを返す
     def data(self, index, role: int = Qt.ItemDataRole.DisplayRole):
