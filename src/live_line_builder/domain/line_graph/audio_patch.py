@@ -1,10 +1,14 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
+from typing import NewType
 
 # ==========================================
 # 1. データ定義 (Models)
 # ==========================================
+
+EquipmentID = NewType("EquipmentID", str)
+PortID = NewType("PortID", str)
 
 
 class NodeType(Enum):
@@ -31,17 +35,17 @@ class PortGender(Enum):
 
 @dataclass
 class Port:
-    id: str
+    id: PortID
     name: str
     direction: PortDirection
     gender: PortGender
-    equipment_id: str
+    equipment_id: EquipmentID
     channel_no: int | None = None
 
 
 @dataclass
 class Equipment:
-    id: str
+    id: EquipmentID
     name: str
     type: NodeType
 
@@ -55,12 +59,14 @@ class AudioPatchSystem:
     """音響回線の状態管理とパッチング操作を提供するコアシステム"""
 
     def __init__(self):
-        self.equipments: dict[str, Equipment] = {}
-        self.ports: dict[str, Port] = {}
+        self.equipments: dict[EquipmentID, Equipment] = {}
+        self.ports: dict[PortID, Port] = {}
 
         # グラフ接続情報
-        self.forward_edges: dict[str, set[str]] = {}  # OUT_port_id -> set(IN_port_ids)
-        self.backward_edges: dict[str, str] = {}  # IN_port_id -> OUT_port_id
+        self.forward_edges: dict[
+            PortID, set[PortID]
+        ] = {}  # OUT_port_id -> set(IN_port_ids)
+        self.backward_edges: dict[PortID, PortID] = {}  # IN_port_id -> OUT_port_id
 
     # --- 単純な内部補助関数 ---
     def _get_equipment_id(self, port_id):
@@ -77,7 +83,7 @@ class AudioPatchSystem:
             # 出力側なら受け手のリストを作成
             self.forward_edges[port.id] = set()
 
-    def connect_ports(self, port_a_id: str, port_b_id: str):
+    def connect_ports(self, port_a_id: PortID, port_b_id: PortID):
         """物理的な結線（方向は自動でOUT->INに正規化）"""
         p_a = self.ports[port_a_id]
         p_b = self.ports[port_b_id]
@@ -96,7 +102,9 @@ class AudioPatchSystem:
         self.forward_edges[out_port.id].add(in_port.id)
         self.backward_edges[in_port.id] = out_port.id
 
-    def get_required_conversion(self, out_port_id: str, in_port_id: str) -> str | None:
+    def get_required_conversion(
+        self, out_port_id: PortID, in_port_id: PortID
+    ) -> str | None:
         """物理的な整合性（オス/メス）を判定し、必要な変換を返す"""
         out_p = self.ports[out_port_id]
         in_p = self.ports[in_port_id]
@@ -107,7 +115,7 @@ class AudioPatchSystem:
 
     # --- グラフ探索 (Generatorで分離) ---
 
-    def _get_next_upstream_ports(self, port_id: str) -> list[str]:
+    def _get_next_upstream_ports(self, port_id: PortID) -> list[PortID]:
         """指定ポートの1つ上流にあるポートID群を取得"""
         port = self.ports[port_id]
         if port.direction == PortDirection.IN:
@@ -123,10 +131,10 @@ class AudioPatchSystem:
                 and p.direction == PortDirection.IN
             ]
 
-    def _traverse_upstream(self, start_port_id: str) -> Iterator[str]:
+    def _traverse_upstream(self, start_port_id: PortID) -> Iterator[PortID]:
         """ポートから上流へ向かってノードを巡回するジェネレータ"""
         visited = set()
-        stack = [start_port_id]
+        stack: list[PortID] = [start_port_id]
         while stack:
             curr = stack.pop()
             if curr in visited:
@@ -135,7 +143,7 @@ class AudioPatchSystem:
             yield curr
             stack.extend(self._get_next_upstream_ports(curr))
 
-    def _get_next_downstream_ports(self, port_id: str) -> list[str]:
+    def _get_next_downstream_ports(self, port_id: PortID) -> list[PortID]:
         """指定ポートの1つ下流にあるポートID群を取得"""
         port = self.ports[port_id]
         if port.direction == PortDirection.OUT:
@@ -151,7 +159,7 @@ class AudioPatchSystem:
                 and p.channel_no == port.channel_no
             ]
 
-    def _traverse_downstream(self, start_port_id: str) -> Iterator[str]:
+    def _traverse_downstream(self, start_port_id: PortID) -> Iterator[PortID]:
         """ポートから下流へ向かってノードを巡回するジェネレータ"""
         visited = set()
         stack = [start_port_id]
@@ -166,7 +174,7 @@ class AudioPatchSystem:
     # --- 高度な自動パッチング機能 ---
 
     def auto_patch_mixer_from_stagebox(
-        self, mixer_in_port_id: str, stagebox_eq_id: str, ch_no: int
+        self, mixer_in_port_id: PortID, stagebox_eq_id: PortID, ch_no: int
     ) -> Equipment | None:
         """マルチの番号を指定してミキサーに繋ぐ。成功した場合、上流の楽器を返す。"""
         sb_out_port = next(
@@ -195,7 +203,7 @@ class AudioPatchSystem:
         return None
 
     def auto_patch_mixer_from_instrument(
-        self, mixer_in_port_id: str, instrument_eq_id: str
+        self, mixer_in_port_id: PortID, instrument_eq_id: PortID
     ) -> Port:
         """楽器を指定し、マルチを経由してミキサーに繋ぐ。成功した場合、経由したマルチのポートを返す。"""
         out_ports = [
@@ -222,7 +230,7 @@ class AudioPatchSystem:
         return sb_out_port
 
     # 長さ取得系関数
-    def get_upstream_length(self, start_port_id: str) -> int:
+    def get_upstream_length(self, start_port_id: PortID) -> int:
         visited = set()
         # 開始ポートの深さを 1 に設定
         stack = [(start_port_id, 1)]
@@ -244,7 +252,7 @@ class AudioPatchSystem:
 
         return max_length
 
-    def get_downstream_length(self, start_port_id: str) -> int:
+    def get_downstream_length(self, start_port_id: PortID) -> int:
         # スタックには (現在のポートID, 現在の深さ, 現在の経路のセット) を入れる
         stack = [(start_port_id, 0, {start_port_id})]
         max_length = 0
@@ -271,7 +279,7 @@ class AudioPatchSystem:
 
         return max_length
 
-    def get_downstream_equipment_length(self, start_port_id: str) -> int:
+    def get_downstream_equipment_length(self, start_port_id: PortID) -> int:
 
         # スタック: (現在のポートID, 経由した機材数, ループ検知用の通過済みポートセット)
         # 開始時点で1台目の機材内にいるため、機材数は 1 とする
@@ -316,7 +324,7 @@ def print_visual_patch_flow(sys: AudioPatchSystem):
     """【表示機能 1】横並びで回線のフローをビジュアル表示する"""
     print("\n=== ビジュアル回線フロー ===")
 
-    def build_chain(out_id: str, in_id: str) -> str:
+    def build_chain(out_id: PortID, in_id: PortID) -> str:
         out_p = sys.ports[out_id]
         in_p = sys.ports[in_id]
         out_eq = sys.equipments[out_p.equipment_id]
@@ -357,87 +365,3 @@ def print_all_connections(sys: AudioPatchSystem):
             print(
                 f"OUT: {out_eq.name} ({out_p.name}) => IN: {in_eq.name} ({in_p.name})"
             )
-
-
-# ==========================================
-# 4. テスト用シナリオ (AI・開発者向け)
-# ==========================================
-if __name__ == "__main__":
-    """
-    【テスト設計ヒント】
-    別のAIが pytest などを作成する場合、以下の Arrange (準備), Act (実行), Assert (検証) の
-    流れを参考にテストケースを構築してください。
-    - 正常系: 返り値のオブジェクトのアサーション (assert result.name == "...")
-    - 異常系: 例外が正しく発生するかの検証 (with pytest.raises(ValueError): ...)
-    """
-    sys = AudioPatchSystem()
-
-    # --- [Arrange] 事前データの準備 ---
-    sys.add_equipment(Equipment("eq_vo", "Vo.Mic", NodeType.INSTRUMENT))
-    sys.add_equipment(Equipment("eq_gt", "Gt.Amp", NodeType.INSTRUMENT))
-    sys.add_equipment(Equipment("eq_sb", "StageBox16", NodeType.STAGE_BOX))
-    sys.add_equipment(Equipment("eq_mix", "CL5 Console", NodeType.MIXER))
-
-    sys.add_port(Port("vo_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_vo"))
-    sys.add_port(Port("gt_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_gt"))
-
-    # StageBox Ch1 (Vo用)
-    sys.add_port(
-        Port("sb_in1", "Ch1 In", PortDirection.IN, PortGender.FEMALE, "eq_sb", 1)
-    )
-    sys.add_port(
-        Port("sb_out1", "Ch1 Out", PortDirection.OUT, PortGender.MALE, "eq_sb", 1)
-    )
-    # StageBox Ch2 (Gt用, まだ結線されていない)
-    sys.add_port(
-        Port("sb_in2", "Ch2 In", PortDirection.IN, PortGender.FEMALE, "eq_sb", 2)
-    )
-    sys.add_port(
-        Port("sb_out2", "Ch2 Out", PortDirection.OUT, PortGender.MALE, "eq_sb", 2)
-    )
-
-    # ミキサー入力
-    sys.add_port(
-        Port("mix_in1", "Ch1 In", PortDirection.IN, PortGender.FEMALE, "eq_mix", 1)
-    )
-    sys.add_port(
-        Port("mix_in2", "Ch2 In", PortDirection.IN, PortGender.FEMALE, "eq_mix", 2)
-    )
-
-    # 舞台上の仕込み配線 (Vo -> マルチCh1)
-    sys.connect_ports("vo_out", "sb_in1")
-
-    # --- [Act & Assert] テストケースの実行 ---
-
-    print("--- 正常系テスト1: マルチ指定でのパッチング ---")
-    # 期待値: Ch1を指定すると、結線が成功し、上流の「Vo.Mic」が返されること。
-    found_inst = sys.auto_patch_mixer_from_stagebox(
-        mixer_in_port_id="mix_in1", stagebox_eq_id="eq_sb", ch_no=1
-    )
-    if found_inst:
-        print(f"成功: 自動結線完了。検出された楽器 -> {found_inst.name}")
-
-    print("\n--- 異常系テスト1: 未配線の楽器を指定した場合 ---")
-    # 期待値: Gt.Ampはまだマルチに繋がっていないため、ValueErrorが起きること。
-    try:
-        sys.auto_patch_mixer_from_instrument(
-            mixer_in_port_id="mix_in2", instrument_eq_id="eq_gt"
-        )
-    except ValueError as e:
-        print(f"想定通りのエラー発生: {e}")
-
-    print("\n--- 異常系テスト2: 性別エラー(変換プラグ必要)の検証 ---")
-    # 期待値: オス同士を繋ごうとした場合、get_required_conversion で "要 M-M変換" が返ること。
-
-    sys.add_port(
-        Port("mix_aux1_out", "Aux1 Out", PortDirection.OUT, PortGender.MALE, "eq_mix")
-    )
-    try:
-        # (注意: connect_ports自体は論理結線なので実行可能。表示時に物理警告が出る設計)
-        sys.connect_ports("mix_aux1_out", "sb_out2")
-    except ValueError as e:
-        print(f"想定通りのエラー発生: {e}")
-
-    # --- 出力機能のテスト ---
-    print_all_connections(sys)
-    print_visual_patch_flow(sys)
