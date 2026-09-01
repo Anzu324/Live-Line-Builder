@@ -1,4 +1,5 @@
 import pytest
+from graph.const import *
 
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
@@ -19,49 +20,41 @@ def patch_system():
     sys = AudioPatchSystem()
 
     # --- [Arrange] 事前データの準備 ---
-    sys.add_equipment(Equipment("eq_vo", "Vo.Mic", NodeType.MIC))
-    sys.add_equipment(Equipment("eq_lg", "LG.Amp", NodeType.INSTRUMENT))
-    sys.add_equipment(Equipment("eq_lg_mic", "LG.Mic", NodeType.MIC))
-    sys.add_equipment(Equipment("eq_sb", "StageBox16", NodeType.STAGE_BOX))
-    sys.add_equipment(Equipment("eq_mix", "MG24/14FX Console", NodeType.MIXER))
+    sys.add_equipment(Equipment(EQ_VO, "Vo.Mic", NodeType.MIC))
+    sys.add_equipment(Equipment(EQ_LG, "LG.Amp", NodeType.INSTRUMENT))
+    sys.add_equipment(Equipment(EQ_LG_MIC, "LG.Mic", NodeType.MIC))
+    sys.add_equipment(Equipment(EQ_SB, "StageBox16", NodeType.STAGE_BOX))
+    sys.add_equipment(Equipment(EQ_MIX, "MG24/14FX Console", NodeType.MIXER))
 
     # 楽器ポート
-    sys.add_port(Port("vo_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_vo"))
-    sys.add_port(Port("lg_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_lg"))
+    sys.add_port(Port(VO_OUT, "Out", PortDirection.OUT, PortGender.MALE, EQ_VO))
+    sys.add_port(Port(LG_OUT, "Out", PortDirection.OUT, PortGender.MALE, EQ_LG))
     sys.add_port(
-        Port("lg_mic_in", "IN", PortDirection.IN, PortGender.FEMALE, "eq_lg_mic", 1)
+        Port(LG_MIC_IN, "IN", PortDirection.IN, PortGender.FEMALE, EQ_LG_MIC, 1)
     )
     sys.add_port(
-        Port("lg_mic_out", "Out", PortDirection.OUT, PortGender.MALE, "eq_lg_mic", 1)
+        Port(LG_MIC_OUT, "Out", PortDirection.OUT, PortGender.MALE, EQ_LG_MIC, 1)
     )
 
     # StageBox Ch1 (Vo用)
-    sys.add_port(
-        Port("sb_in1", "Ch1 In", PortDirection.IN, PortGender.FEMALE, "eq_sb", 1)
-    )
-    sys.add_port(
-        Port("sb_out1", "Ch1 Out", PortDirection.OUT, PortGender.MALE, "eq_sb", 1)
-    )
+    sys.add_port(Port(SB_IN1, "Ch1 In", PortDirection.IN, PortGender.FEMALE, EQ_SB, 1))
+    sys.add_port(Port(SB_OUT1, "Ch1 Out", PortDirection.OUT, PortGender.MALE, EQ_SB, 1))
 
     # StageBox Ch2 (Gt用)
-    sys.add_port(
-        Port("sb_in2", "Ch2 In", PortDirection.IN, PortGender.FEMALE, "eq_sb", 2)
-    )
-    sys.add_port(
-        Port("sb_out2", "Ch2 Out", PortDirection.OUT, PortGender.MALE, "eq_sb", 2)
-    )
+    sys.add_port(Port(SB_IN2, "Ch2 In", PortDirection.IN, PortGender.FEMALE, EQ_SB, 2))
+    sys.add_port(Port(SB_OUT2, "Ch2 Out", PortDirection.OUT, PortGender.MALE, EQ_SB, 2))
 
     # ミキサー入力
     sys.add_port(
-        Port("mix_in1", "Ch1 In", PortDirection.IN, PortGender.FEMALE, "eq_mix", 1)
+        Port(MIX_IN1, "Ch1 In", PortDirection.IN, PortGender.FEMALE, EQ_MIX, 1)
     )
     sys.add_port(
-        Port("mix_in2", "Ch2 In", PortDirection.IN, PortGender.FEMALE, "eq_mix", 2)
+        Port(MIX_IN2, "Ch2 In", PortDirection.IN, PortGender.FEMALE, EQ_MIX, 2)
     )
 
     # テスト用のAux出力(オス) - 性別エラー検証用
     sys.add_port(
-        Port("mix_aux1_out", "Aux1 Out", PortDirection.OUT, PortGender.MALE, "eq_mix")
+        Port(MIX_AUX1_OUT, "Aux1 Out", PortDirection.OUT, PortGender.MALE, EQ_MIX)
     )
 
     return sys
@@ -74,58 +67,56 @@ def patch_system():
 
 def test_add_equipment_and_port(patch_system):
     """機器とポートが正しく登録されるか"""
-    assert "eq_vo" in patch_system.equipments
-    assert "vo_out" in patch_system.ports
-    assert patch_system.ports["vo_out"].direction == PortDirection.OUT
-    assert "vo_out" in patch_system.forward_edges
+    assert EQ_VO in patch_system.equipments
+    assert VO_OUT in patch_system.ports
+    assert patch_system.ports[VO_OUT].direction == PortDirection.OUT
+    assert VO_OUT in patch_system.forward_edges
 
 
 def test_connect_ports_success(patch_system):
     """正常にポート同士が結線されるか"""
-    patch_system.connect_ports("vo_out", "sb_in1")
+    patch_system.connect_ports(VO_OUT, SB_IN1)
 
     # 順方向(OUT -> IN)の確認
-    assert "sb_in1" in patch_system.forward_edges["vo_out"]
+    assert SB_IN1 in patch_system.forward_edges[VO_OUT]
     # 逆方向(IN -> OUT)の確認
-    assert patch_system.backward_edges["sb_in1"] == "vo_out"
+    assert patch_system.backward_edges[SB_IN1] == VO_OUT
 
 
 def test_connect_ports_same_direction_error(patch_system):
     """同属性（OUT同士、IN同士）の接続でエラーが発生するか"""
     # OUT同士
     with pytest.raises(ValueError, match="同属性（OUT同士）は接続できません。"):
-        patch_system.connect_ports("vo_out", "lg_out")
+        patch_system.connect_ports(VO_OUT, LG_OUT)
 
     # IN同士
     with pytest.raises(ValueError, match="同属性（IN同士）は接続できません。"):
-        patch_system.connect_ports("sb_in1", "sb_in2")
+        patch_system.connect_ports(SB_IN1, SB_IN2)
 
 
 def test_connect_ports_overwrite_existing(patch_system):
     """すでに結線されているINポートに別のOUTを繋いだ場合、上書きされるか"""
     # 初期接続 (Vo -> StageBox Ch1)
-    patch_system.connect_ports("vo_out", "sb_in1")
-    assert "sb_in1" in patch_system.forward_edges["vo_out"]
+    patch_system.connect_ports(VO_OUT, SB_IN1)
+    assert SB_IN1 in patch_system.forward_edges[VO_OUT]
 
     # 別の出力(Gt)を同じ入力(StageBox Ch1)に接続
-    patch_system.connect_ports("lg_out", "sb_in1")
+    patch_system.connect_ports(LG_OUT, SB_IN1)
 
     # 古い結線(Vo)から削除されていること
-    assert "sb_in1" not in patch_system.forward_edges["vo_out"]
+    assert SB_IN1 not in patch_system.forward_edges[VO_OUT]
     # 新しい結線(Gt)が登録されていること
-    assert "sb_in1" in patch_system.forward_edges["lg_out"]
-    assert patch_system.backward_edges["sb_in1"] == "lg_out"
+    assert SB_IN1 in patch_system.forward_edges[LG_OUT]
+    assert patch_system.backward_edges[SB_IN1] == LG_OUT
 
 
 def test_get_required_conversion(patch_system):
     """物理的整合性（オス/メス）の判定と変換プラグの必要性が正しいか"""
     # 正常（MALE -> FEMALE）
-    assert patch_system.get_required_conversion("vo_out", "sb_in1") is None
+    assert patch_system.get_required_conversion(VO_OUT, SB_IN1) is None
 
     # 異常: MALE -> MALE (例: ミキサーAUXからStageBoxのOUTに繋ぐような誤配線チェック)
-    assert (
-        patch_system.get_required_conversion("mix_aux1_out", "sb_out2") == "要 M-M変換"
-    )
+    assert patch_system.get_required_conversion(MIX_AUX1_OUT, SB_OUT2) == "要 M-M変換"
 
 
 # ==========================================
@@ -136,7 +127,7 @@ def test_get_required_conversion(patch_system):
 def test_auto_patch_mixer_from_stagebox_success(patch_system):
     """【正常系1】StageBoxのCh指定による自動パッチングが成功するか"""
     # [Arrange] 舞台上の仕込み配線 (Vo -> マルチCh1)
-    patch_system.connect_ports("vo_out", "sb_in1")
+    patch_system.connect_ports(VO_OUT, SB_IN1)
 
     # [Act] ミキサーのCh1にマルチのCh1をパッチング
     found_inst = patch_system.auto_patch_mixer_from_stagebox(
@@ -148,7 +139,7 @@ def test_auto_patch_mixer_from_stagebox_success(patch_system):
     assert found_inst.id == "eq_vo"
     assert found_inst.name == "Vo.Mic"
     # ミキサー入力側に正しく繋がっているか
-    assert "mix_in1" in patch_system.forward_edges["sb_out1"]
+    assert MIX_IN1 in patch_system.forward_edges[SB_OUT1]
 
 
 def test_auto_patch_mixer_from_stagebox_not_found(patch_system):
@@ -157,24 +148,24 @@ def test_auto_patch_mixer_from_stagebox_not_found(patch_system):
         ValueError, match=r"指定されたStageBox\(Ch.99\)の出力ポートが見つかりません。"
     ):
         patch_system.auto_patch_mixer_from_stagebox(
-            mixer_in_port_id="mix_in1", stagebox_eq_id="eq_sb", ch_no=99
+            mixer_in_port_id=MIX_IN1, stagebox_eq_id=EQ_SB, ch_no=99
         )
 
 
 def test_auto_patch_mixer_from_instrument_success(patch_system):
     """【正常系2】楽器指定による自動パッチングが成功するか"""
     # [Arrange] 舞台上の仕込み配線 (LG -> マルチCh2)
-    patch_system.connect_ports("lg_out", "sb_in2")
+    patch_system.connect_ports(LG_OUT, SB_IN2)
 
     # [Act] 楽器(LG)を指定してミキサーにパッチング
     sb_out_port = patch_system.auto_patch_mixer_from_instrument(
-        mixer_in_port_id="mix_in2", instrument_eq_id="eq_lg"
+        mixer_in_port_id=MIX_IN2, instrument_eq_id=EQ_LG
     )
 
     # [Assert] 経由したStageBoxの出力ポートが返却され、結線が完了していること
     assert sb_out_port is not None
-    assert sb_out_port.id == "sb_out2"
-    assert "mix_in2" in patch_system.forward_edges["sb_out2"]
+    assert sb_out_port.id == SB_OUT2
+    assert MIX_IN2 in patch_system.forward_edges[SB_OUT2]
 
 
 def test_auto_patch_mixer_from_instrument_not_connected(patch_system):
@@ -184,18 +175,20 @@ def test_auto_patch_mixer_from_instrument_not_connected(patch_system):
         ValueError, match="この楽器はStageBoxまで回線が到達していません。"
     ):
         patch_system.auto_patch_mixer_from_instrument(
-            mixer_in_port_id="mix_in2", instrument_eq_id="eq_lg"
+            mixer_in_port_id=MIX_IN2, instrument_eq_id=EQ_LG
         )
 
 
 def test_auto_patch_mixer_from_instrument_no_out_ports(patch_system):
     """【異常系】出力ポートを持たない楽器を指定した場合のエラー"""
     # 出力ポートを持たないダミー楽器を追加
-    patch_system.add_equipment(Equipment("eq_dummy", "Dummy", NodeType.INSTRUMENT))
+    patch_system.add_equipment(
+        Equipment(EquipmentID("eq_dummy"), "Dummy", NodeType.INSTRUMENT)
+    )
 
     with pytest.raises(ValueError, match="指定された楽器に出力ポートが存在しません。"):
         patch_system.auto_patch_mixer_from_instrument(
-            mixer_in_port_id="mix_in2", instrument_eq_id="eq_dummy"
+            mixer_in_port_id=MIX_IN2, instrument_eq_id=EquipmentID("eq_dummy")
         )
 
 
