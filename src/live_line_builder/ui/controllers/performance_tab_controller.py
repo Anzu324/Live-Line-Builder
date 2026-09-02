@@ -7,10 +7,10 @@ class PerformanceTabController:
     def __init__(self, view: WorkSheetTabWidget) -> None:
         self._view = view
 
-    def set_tabs(self, tabs: list[tuple[str, QWidget]]):
+    def set_tabs(self, tabs: list[tuple[str, QWidget, QWidget]]) -> None:
         """タブのタイトルとウィジェットのリストを受け取り、タブを設定する"""
         self._view.clear()  # 既存のタブをクリア
-        for title, widget in tabs:
+        for title, widget, graph_widget in tabs:
             scroll_area = QScrollArea()
             scroll_area.setFrameShape(QFrame.Shape.NoFrame)
             # 中身のウィジェットをスクロールエリアの幅に自動フィットさせる

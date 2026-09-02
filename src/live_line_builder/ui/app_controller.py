@@ -82,7 +82,7 @@ class AppController(QObject):
             tab_names.append(model.tab_name)
 
         PerformanceTabController(self.main_window.tabs).set_tabs(
-            list(zip(tab_names, self.worksheet_widgets))
+            list(zip(tab_names, self.worksheet_widgets, self.worksheet_widgets))
         )
 
     # モックでデータマネージャーを構築する
