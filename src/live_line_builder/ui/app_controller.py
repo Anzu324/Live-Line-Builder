@@ -2,7 +2,10 @@ from PySide6.QtCore import QObject, Signal, Slot
 
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import ProjectDataEntity
-from live_line_builder.ui.controllers import WorksheetController
+from live_line_builder.ui.controllers import (
+    PerformanceTabController,
+    WorksheetController,
+)
 from live_line_builder.ui.models import (
     DataManager,
     EquipmentModel,
@@ -78,9 +81,8 @@ class AppController(QObject):
             self.worksheet_ctrls.append(WorksheetController(view, model))
             tab_names.append(model.tab_name)
 
-        self.main_window.set_tabs(
-            self.worksheet_widgets,
-            tab_names,
+        PerformanceTabController(self.main_window.tabs).set_tabs(
+            list(zip(tab_names, self.worksheet_widgets))
         )
 
     # モックでデータマネージャーを構築する
