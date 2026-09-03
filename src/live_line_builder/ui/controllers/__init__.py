@@ -1,3 +1,4 @@
 from .live_info_controller import LiveInfoController
 from .performance_tab_controller import PerformanceTabController
+from .performance_views_selector_controller import PerformanceViewSelectorController
 from .worksheet_controller import WorksheetController
