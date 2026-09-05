@@ -1,3 +1,4 @@
+import faulthandler
 import sys
 
 import qdarktheme
@@ -8,6 +9,9 @@ from live_line_builder.ui.views.main_window import MainWindow
 
 
 def main():
+
+    faulthandler.enable()  # コードの最初（sys.exitの前など）で実行
+
     # 1. アプリケーションの作成（必須）
     app = QApplication(sys.argv)
 

@@ -49,7 +49,7 @@ class ComboBoxTabsView(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setMinimumSize(250, 200)
+        widget.setMinimumSize(250, 200)
         scroll_area.setWidget(widget)
 
         self.stacked_widget.addWidget(scroll_area)

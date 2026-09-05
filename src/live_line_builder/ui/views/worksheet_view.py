@@ -72,5 +72,5 @@ class WorkSheetView(QWidget):
         self.h_layout.addWidget(self.table3_view)  # レイアウトにQTableViewを追加
         self.h_layout.setContentsMargins(0, 0, 0, 0)
         self.h_layout.setSpacing(10)  # レイアウトの余白を10に設定
-        self.v_layout.addLayout(self.h_layout)
-        self.setLayout(self.v_layout)  # 垂直レイアウトに水平レイアウトを追
+        self.v_layout.addLayout(self.h_layout)  # 垂直レイアウトに水平レイアウトを追加
+        self.setLayout(self.v_layout)

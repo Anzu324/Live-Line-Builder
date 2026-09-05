@@ -1,4 +1,5 @@
 from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtWidgets import QWidget
 
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import ProjectDataEntity
@@ -67,9 +68,11 @@ class AppController(QObject):
 
         self.main_window.show()  # 表示
 
+        tab_names: list[str] = []
+
         self.worksheet_widgets: list[WorkSheetView] = []
         self.worksheet_ctrls: list[WorksheetController] = []
-        tab_names: list[str] = []
+        self.patch_views: list[QWidget] = []
         for model in self.performance_data:
             view = WorkSheetView(
                 self._equipments,
@@ -79,10 +82,11 @@ class AppController(QObject):
             )
             self.worksheet_widgets.append(view)
             self.worksheet_ctrls.append(WorksheetController(view, model))
+            self.patch_views.append(QWidget())  # 仮で同じviewを追加しているだけです。
             tab_names.append(model.tab_name)
 
         PerformanceTabController(self.main_window.tabs).set_tabs(
-            list(zip(tab_names, self.worksheet_widgets, self.worksheet_widgets))
+            list(zip(tab_names, self.worksheet_widgets, self.patch_views))
         )
 
     # モックでデータマネージャーを構築する
