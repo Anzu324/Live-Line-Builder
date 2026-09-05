@@ -4,7 +4,7 @@ import sys
 import qdarktheme
 from PySide6.QtWidgets import QApplication
 
-from live_line_builder.ui.app_controller import AppController
+from live_line_builder.ui.controllers.app_controller import AppController
 from live_line_builder.ui.views.main_window import MainWindow
 
 
