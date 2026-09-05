@@ -8,7 +8,6 @@ class PerformanceViewSelectorController:
         self._view = view
 
     def set_performance_views(self, performance_views: list[QWidget]):
-        self._view.clear_widgets()
         self._view.set_widgets(performance_views)
 
         self._view.combo_box.setCurrentIndex(0)  # 最初のタブを選択状態にする
