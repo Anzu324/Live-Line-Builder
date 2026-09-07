@@ -1,5 +1,6 @@
 from .combo_box_tabs_view import ComboBoxTabsView
 from .live_info_view import LiveInfoView
 from .main_window import MainWindow
+from .table import EquipmentTableView
 from .tabs import WorkSheetTabWidget
 from .worksheet_view import WorkSheetView
