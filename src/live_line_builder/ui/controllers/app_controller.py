@@ -16,7 +16,7 @@ from live_line_builder.ui.models import (
 from live_line_builder.ui.models.data_manager import (
     PerformanceGroup,  # 仮です。削除すること。
 )
-from live_line_builder.ui.views import MainWindow, PlanSheetView
+from live_line_builder.ui.views import AudioPatchTableView, MainWindow, PlanSheetView
 
 
 # ★ QObject を継承する
@@ -82,7 +82,9 @@ class AppController(QObject):
             )
             self.worksheet_widgets.append(view)
             self.worksheet_ctrls.append(PlanSheetController(view, model))
-            self.patch_views.append(QWidget())  # 仮で同じviewを追加しているだけです。
+            self.patch_views.append(
+                AudioPatchTableView()
+            )  # 仮で同じviewを追加しているだけです。
             tab_names.append(model.tab_name)
 
         PerformanceTabController(self.main_window.tabs).set_tabs(
