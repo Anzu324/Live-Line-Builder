@@ -4,14 +4,13 @@ from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import (
     EquipmentEntity,
     EquipmentPortEntity,
-    PerformanceEntity,
+    PerformanceGroup,
 )
 from live_line_builder.domain.entities.columns import (
     EQUIPMENT_COLUMNS,
     EQUIPMENT_PORT_COLUMNS,
 )
 from live_line_builder.domain.entities.table_entity import zip_column_key_and_table
-from live_line_builder.domain.line_graph.audio_patch import AudioPatchSystem
 
 
 # TODO:公演ごとにもろもろを切り替える処理
@@ -56,20 +55,3 @@ class DataManager(QObject):
     @property
     def equipment_port_entity(self) -> EquipmentPortEntity:
         return self._equipment_port_entity
-
-
-class PerformanceGroup:
-    """
-    公演ごとに分けてデータを持つ機能
-    """
-
-    def __init__(self) -> None:
-        self._live_info: PerformanceEntity = PerformanceEntity()
-        self._audiopath: AudioPatchSystem = AudioPatchSystem()
-
-    @staticmethod
-    def make_default() -> PerformanceGroup:
-        """
-        __init__が変更されても常に引数無しで初期値が生成することを保証する。
-        """
-        return PerformanceGroup()

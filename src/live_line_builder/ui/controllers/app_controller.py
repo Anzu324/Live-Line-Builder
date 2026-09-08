@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, Signal, Slot
 from PySide6.QtWidgets import QWidget
 
 from live_line_builder.app_mock import mock_data
-from live_line_builder.domain.entities import ProjectDataEntity
+from live_line_builder.domain.entities import PerformanceGroup, ProjectDataEntity
 from live_line_builder.ui.controllers import (
     PerformanceTabController,
     PlanSheetController,
@@ -12,9 +12,6 @@ from live_line_builder.ui.models import (
     EquipmentModel,
     EquipmentPortModel,
     PerformanceModel,
-)
-from live_line_builder.ui.models.data_manager import (
-    PerformanceGroup,  # 仮です。削除すること。
 )
 from live_line_builder.ui.views import AudioPatchTableView, MainWindow, PlanSheetView
 

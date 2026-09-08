@@ -10,7 +10,7 @@ from live_line_builder.storages.schemas import (
 
 
 # AIそのまま持ってきた実装(参考用)
-class EquipmentRepository:
+class ProjectRepository:
     def load(self, file_path: Path) -> tuple[EquipmentEntity, EquipmentPortEntity]:
         """JSON(ネスト) ➔ Entity(フラット)"""
         json_str = file_path.read_text(encoding="utf-8")
