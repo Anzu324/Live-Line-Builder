@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QFrame, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
-from live_line_builder.ui.views.tabs import WorkSheetTabWidget
-from live_line_builder.ui.views.worksheet_view import (
-    WorkSheetView,  # メインコンテンツビューをインポート
+from live_line_builder.ui.views.plan_sheet_view import (
+    PlanSheetView,  # メインコンテンツビューをインポート
 )
+from live_line_builder.ui.views.tabs import WorkSheetTabWidget
 
 
 # メインウィンドウのクラス
@@ -32,11 +32,11 @@ class MainWindow(QWidget):
         self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
         self.v_layout.addWidget(self.tabs)  # レイアウトにメインコンテンツビューを追加
 
-    def set_central_widget(self, widget: WorkSheetView):
+    def set_central_widget(self, widget: PlanSheetView):
         self.set_tabs([widget])
         # self.scroll_area.setWidget(self.central_widget)
 
-    def set_tabs(self, tabs_source: list[WorkSheetView], tab_names=None):
+    def set_tabs(self, tabs_source: list[PlanSheetView], tab_names=None):
         self.tabs.clear()
         if tab_names is None:
             tab_names = ["" for i in tabs_source]

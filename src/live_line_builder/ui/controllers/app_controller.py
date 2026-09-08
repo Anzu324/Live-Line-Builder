@@ -5,7 +5,7 @@ from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import ProjectDataEntity
 from live_line_builder.ui.controllers import (
     PerformanceTabController,
-    WorksheetController,
+    PlanSheetController,
 )
 from live_line_builder.ui.models import (
     DataManager,
@@ -16,7 +16,7 @@ from live_line_builder.ui.models import (
 from live_line_builder.ui.models.data_manager import (
     PerformanceGroup,  # 仮です。削除すること。
 )
-from live_line_builder.ui.views import MainWindow, WorkSheetView
+from live_line_builder.ui.views import MainWindow, PlanSheetView
 
 
 # ★ QObject を継承する
@@ -70,18 +70,18 @@ class AppController(QObject):
 
         tab_names: list[str] = []
 
-        self.worksheet_widgets: list[WorkSheetView] = []
-        self.worksheet_ctrls: list[WorksheetController] = []
+        self.worksheet_widgets: list[PlanSheetView] = []
+        self.worksheet_ctrls: list[PlanSheetController] = []
         self.patch_views: list[QWidget] = []
         for model in self.performance_data:
-            view = WorkSheetView(
+            view = PlanSheetView(
                 self._equipments,
                 self._equipment_ports,
                 [1, 2],  # 例: 列0と列1をフィルター対象とする
                 parent=self.main_window,
             )
             self.worksheet_widgets.append(view)
-            self.worksheet_ctrls.append(WorksheetController(view, model))
+            self.worksheet_ctrls.append(PlanSheetController(view, model))
             self.patch_views.append(QWidget())  # 仮で同じviewを追加しているだけです。
             tab_names.append(model.tab_name)
 
