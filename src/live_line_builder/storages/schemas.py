@@ -71,9 +71,18 @@ class PerformanceSchema(BaseModel):
     sound_crews: str
 
 
+class PerformanceGroupSchema(BaseModel):
+    """
+    公演ごとの情報をまとめて持つコンテナ
+    """
+
+    performance_data: PerformanceSchema
+    patch_system: AudioPatchSystemSchema = AudioPatchSystemSchema()
+
+
 class ProjectDataSchema(BaseModel):
     equipments: list[EquipmentSchema] = []
-    patch_system: AudioPatchSystemSchema = AudioPatchSystemSchema()
+    performance_group: list[PerformanceGroupSchema] = []
     # def to_part_table(self) -> PartTableEntity:
     #     # SchemaがEntityを生成して返す
     #     return PartTableEntity(rows=[p.model_dump() for p in self.parts])
