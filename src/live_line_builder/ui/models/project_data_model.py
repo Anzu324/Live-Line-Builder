@@ -1,6 +1,6 @@
 from PySide6.QtCore import QObject, Signal
 
-from live_line_builder.domain.entities import PerformanceEntity
+from live_line_builder.domain.entities import PerformanceInfoEntity
 
 
 class PerformanceModel(QObject):
@@ -10,10 +10,12 @@ class PerformanceModel(QObject):
 
     data_changed = Signal()  # 引数なしの通知
 
-    def __init__(self, parent=None, entity: PerformanceEntity | None = None) -> None:
+    def __init__(
+        self, parent=None, entity: PerformanceInfoEntity | None = None
+    ) -> None:
         super().__init__(parent)
         if entity is None:
-            self._performance = PerformanceEntity()
+            self._performance = PerformanceInfoEntity()
         else:
             self._performance = entity
 

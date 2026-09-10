@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 # ======= Profiles =======
 
@@ -38,7 +38,6 @@ class PatchEquipmentSchema(BaseModel):
     equip_id: str
     name: str
     equip_type: str
-    quantity: int
     ports: list[PatchPortSchema]
 
 
@@ -76,8 +75,9 @@ class PerformanceGroupSchema(BaseModel):
     公演ごとの情報をまとめて持つコンテナ
     """
 
-    performance_data: PerformanceSchema
-    patch_system: AudioPatchSystemSchema = AudioPatchSystemSchema()
+    model_config = ConfigDict(from_attributes=True)
+    performance_info: PerformanceSchema = Field(validation_alias="_performance_info")
+    audio_patch: AudioPatchSystemSchema = Field(validation_alias="_audio_patch")
 
 
 class ProjectDataSchema(BaseModel):

@@ -1,4 +1,4 @@
-from live_line_builder.domain.entities import PerformanceEntity
+from live_line_builder.domain.entities import PerformanceInfoEntity
 from live_line_builder.domain.line_graph.audio_patch import AudioPatchSystem
 
 
@@ -8,7 +8,7 @@ class PerformanceGroup:
     """
 
     def __init__(self) -> None:
-        self._live_info: PerformanceEntity = PerformanceEntity()
+        self._performance_info: PerformanceInfoEntity = PerformanceInfoEntity()
         self._audiopath: AudioPatchSystem = AudioPatchSystem()
 
     @staticmethod

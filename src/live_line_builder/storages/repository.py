@@ -1,17 +1,25 @@
 from collections import defaultdict
 from pathlib import Path
 
-from live_line_builder.domain.entities import EquipmentEntity, EquipmentPortEntity
+from live_line_builder.domain.entities import (
+    EquipmentEntity,
+    EquipmentPortEntity,
+    PerformanceGroup,
+)
 from live_line_builder.storages.schemas import (
     EquipmentPortSchema,
     EquipmentSchema,
+    PatchEquipmentSchema,
+    PerformanceGroupSchema,
     ProjectDataSchema,
 )
 
 
 # AIそのまま持ってきた実装(参考用)
 class ProjectRepository:
-    def load(self, file_path: Path) -> tuple[EquipmentEntity, EquipmentPortEntity]:
+    def load(
+        self, file_path: Path
+    ) -> tuple[EquipmentEntity, EquipmentPortEntity, list[PerformanceGroup]]:
         """JSON(ネスト) ➔ Entity(フラット)"""
         json_str = file_path.read_text(encoding="utf-8")
         schema = ProjectDataSchema.model_validate_json(json_str)
@@ -30,13 +38,14 @@ class ProjectRepository:
                 port_dict["equip_id"] = equip.equip_id  # 🌟 ここで親のIDを付与！
                 port_rows.append(port_dict)
 
-        return EquipmentEntity(rows=equip_rows), EquipmentPortEntity(rows=port_rows)
+        return EquipmentEntity(rows=equip_rows), EquipmentPortEntity(rows=port_rows), []
 
     def save(
         self,
         file_path: Path,
         equip_table: EquipmentEntity,
         port_table: EquipmentPortEntity,
+        performance_groups: list[PerformanceGroup],
     ):
         """Entity(フラット) ➔ JSON(ネスト)"""
         # 1. Portデータを equip_id ごとにグループ化しておく
@@ -59,6 +68,24 @@ class ProjectRepository:
                 ports=ports_by_equip.get(equip_id, []),  # 該当するPortのリストをセット
             )
             equip_schemas.append(equip_schema)
+
+        performance_group_schemas: list[PerformanceGroupSchema] = []
+        for performance_group in performance_groups:
+            equipments = []
+            for equpment in performance_group._audiopath.equipments.values():
+                equipments.append(
+                    PatchEquipmentSchema(
+                        equip_id=equpment.id,
+                        name=equpment.name,
+                        equip_type=str(equpment.type),
+                        ports=[],
+                    )
+                )
+
+            # Pydanticにより自動的に中のPerformanceInfoとAudioPatchSystemのSchemaもセットする。
+            performance_group_schemas.append(
+                PerformanceGroupSchema.model_validate(performance_group)
+            )
 
         # 3. ファイル書き出し
         project_schema = ProjectDataSchema(equipments=equip_schemas)

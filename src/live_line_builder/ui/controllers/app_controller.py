@@ -47,7 +47,7 @@ class AppController(QObject):
             PerformanceGroup.make_default() for _ in range(4)
         ]
         self.performance_data = [
-            PerformanceModel(self, i._live_info)
+            PerformanceModel(self, i._performance_info)
             for i in self._data_mangeger._performance_group_list
         ]
 
