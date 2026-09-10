@@ -58,7 +58,7 @@ class Equipment:
 class AudioPatchSystem:
     """音響回線の状態管理とパッチング操作を提供するコアシステム"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.equipments: dict[EquipmentID, Equipment] = {}
         self.ports: dict[PortID, Port] = {}
 
@@ -69,21 +69,21 @@ class AudioPatchSystem:
         self.backward_edges: dict[PortID, PortID] = {}  # IN_port_id -> OUT_port_id
 
     # --- 単純な内部補助関数 ---
-    def _get_equipment_id(self, port_id):
+    def _get_equipment_id(self, port_id) -> Equipment:
         return self.equipments[self.ports[port_id].equipment_id]
 
     # --- 登録・基本操作 ---
 
-    def add_equipment(self, eq: Equipment):
+    def add_equipment(self, eq: Equipment) -> None:
         self.equipments[eq.id] = eq
 
-    def add_port(self, port: Port):
+    def add_port(self, port: Port) -> None:
         self.ports[port.id] = port
         if port.direction == PortDirection.OUT:
             # 出力側なら受け手のリストを作成
             self.forward_edges[port.id] = set()
 
-    def connect_ports(self, port_a_id: PortID, port_b_id: PortID):
+    def connect_ports(self, port_a_id: PortID, port_b_id: PortID) -> None:
         """物理的な結線（方向は自動でOUT->INに正規化）"""
         p_a = self.ports[port_a_id]
         p_b = self.ports[port_b_id]
@@ -229,7 +229,8 @@ class AudioPatchSystem:
         self.connect_ports(sb_out_port.id, mixer_in_port_id)
         return sb_out_port
 
-    # 長さ取得系関数
+    # =====長さ取得系関数=====
+
     def get_upstream_length(self, start_port_id: PortID) -> int:
         visited = set()
         # 開始ポートの深さを 1 に設定
