@@ -1,6 +1,6 @@
 import pytest
-from graph.const import *
 
+from graph.const import *
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
     Equipment,

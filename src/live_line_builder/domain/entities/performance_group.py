@@ -1,4 +1,6 @@
-from live_line_builder.domain.entities import PerformanceInfoEntity
+from live_line_builder.domain.entities.performance_info_entity import (
+    PerformanceInfoEntity,
+)
 from live_line_builder.domain.line_graph.audio_patch import AudioPatchSystem
 
 
