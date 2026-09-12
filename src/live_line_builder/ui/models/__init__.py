@@ -1,6 +1,7 @@
 from . import proxies
-from .data_manager import DataManager, PerformanceGroup
+from .data_manager import DataManager
 from .equipment_model import EquipmentModel, EquipmentPortModel
+from .performance_group_model import PerformanceGroupModel
 from .project_data_model import PerformanceInfoEntity, PerformanceModel
 
 __all__ = [

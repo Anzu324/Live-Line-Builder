@@ -11,6 +11,7 @@ from live_line_builder.ui.models import (
     DataManager,
     EquipmentModel,
     EquipmentPortModel,
+    PerformanceGroupModel,
     PerformanceModel,
 )
 from live_line_builder.ui.views import AudioPatchTableView, MainWindow, PlanSheetView
@@ -84,9 +85,12 @@ class AppController(QObject):
             )  # 仮で同じviewを追加しているだけです。
             tab_names.append(model.tab_name)
 
-        PerformanceTabController(self.main_window.tabs).set_tabs(
-            list(zip(tab_names, self.worksheet_widgets, self.patch_views))
-        )
+        # XXX:めっちゃ雑名処理!
+        # 今後直してください。そもそもリストを得て欲しい!
+        PerformanceTabController(
+            self.main_window.tabs,
+            PerformanceGroupModel(group=self._data_mangeger._performance_group_list[0]),
+        ).set_tabs(list(zip(tab_names, self.worksheet_widgets, self.patch_views)))
 
     # モックでデータマネージャーを構築する
     @staticmethod

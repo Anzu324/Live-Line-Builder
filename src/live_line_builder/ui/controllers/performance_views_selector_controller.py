@@ -1,11 +1,13 @@
 from PySide6.QtWidgets import QWidget
 
+from live_line_builder.ui.models import PerformanceModel
 from live_line_builder.ui.views.combo_box_tabs_view import ComboBoxTabsView
 
 
 class PerformanceViewSelectorController:
-    def __init__(self, view: ComboBoxTabsView):
+    def __init__(self, view: ComboBoxTabsView, model: PerformanceModel):
         self._view = view
+        self._model = model
 
     def set_performance_views(self, performance_views: list[QWidget]):
         self._view.set_widgets(performance_views)

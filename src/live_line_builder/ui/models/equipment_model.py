@@ -51,7 +51,10 @@ class EquipmentModel(QAbstractTableModel):
     def setData(self, index, value, role: int = Qt.ItemDataRole.EditRole):
         if role == Qt.ItemDataRole.EditRole:
             # 入力されたvalueをデータに反映
-            self._data[index.row()][index.column()] = value
+            i = self._data.get_row(index.row())
+            if i is None:
+                return False
+            i[index.column()] = value
             # データが変更されたことをViewに通知（これがないと画面が更新されない）
             self.dataChanged.emit(index, index)
             return True
@@ -61,7 +64,7 @@ class EquipmentModel(QAbstractTableModel):
     def get_product_at(self, row: int) -> dict[str, Any] | None:
         """指定した行のデータ（辞書）をそのまま返すヘルパーメソッド"""
         if 0 <= row < len(self._data):
-            return self._data[row]
+            return self._data.get_row(row)
         return None
 
 
@@ -78,7 +81,7 @@ class EquipmentPortModel(QAbstractTableModel):
     # 必須: 列数を返す
     def columnCount(self, parent=None):
         if self._data:
-            return len(self._data[0])
+            return self._data.count_column()
         return 0
 
     # 必須: データを返す

@@ -33,6 +33,9 @@ class TableEntity:
         # 中身は [{"id": "p01", "name": "頭部", "hp": 100}, ...] のような辞書リスト
         self.rows: list[dict[str, RawValue]] = rows or []
 
+    def count_column(self) -> int:
+        return len(self.columns)
+
     def get_value(self, row_idx: int, col_idx: int) -> RawValue | None:
         col_key = self.columns[col_idx].key
         return self.rows[row_idx].get(col_key, self.columns[col_idx].default)
