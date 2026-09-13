@@ -56,16 +56,22 @@ class ProjectRepository:
             equip_id = port_data.pop("equip_id", None)
 
             if equip_id:
-                ports_by_equip[equip_id].append(EquipmentPortSchema(**port_data))
+                ports_by_equip[equip_id].append(
+                    EquipmentPortSchema.model_validate(port_data)
+                )
 
         # 2. Equipment と グループ化した Port を結合して Pydantic Schema を作成
         equip_schemas = []
         for equip_row in equip_table.rows:
             equip_id = equip_row["equip_id"]
 
-            equip_schema = EquipmentSchema(
-                **equip_row,
-                ports=ports_by_equip.get(equip_id, []),  # 該当するPortのリストをセット
+            equip_schema = EquipmentSchema.model_validate(
+                {
+                    **equip_row,
+                    "ports": ports_by_equip.get(
+                        equip_id, []
+                    ),  # 該当するPortのリストをセット
+                }
             )
             equip_schemas.append(equip_schema)
 
