@@ -1,4 +1,6 @@
-from PySide6.QtCore import QObject
+from pathlib import Path
+
+from PySide6.QtCore import QObject, Signal
 
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import (
@@ -11,6 +13,7 @@ from live_line_builder.domain.entities.columns import (
     EQUIPMENT_PORT_COLUMNS,
 )
 from live_line_builder.domain.entities.table_entity import zip_column_key_and_table
+from live_line_builder.storages.repository import ProjectRepository
 
 
 # TODO:公演ごとにもろもろを切り替える処理
@@ -18,6 +21,8 @@ class DataManager(QObject):
     """
     ModelやUIから呼び出され複数のエンティティ(ピュアなデータ)間の橋渡しを担う。
     """
+
+    call_reload_all_ui = Signal()
 
     _equipment_entity: EquipmentEntity
     _equipment_port_entity: EquipmentPortEntity
@@ -55,3 +60,14 @@ class DataManager(QObject):
     @property
     def equipment_port_entity(self) -> EquipmentPortEntity:
         return self._equipment_port_entity
+
+    def load_projetct_from_save_data(self, file_path: Path):
+        repository = ProjectRepository()
+        equipment_entity, equipment_port_entity, performance_groups = repository.load(
+            file_path
+        )
+        self._equipment_entity = equipment_entity
+        self._equipment_port_entity = equipment_port_entity
+        self._performance_group_list = performance_groups
+
+        self.call_reload_all_ui.emit()

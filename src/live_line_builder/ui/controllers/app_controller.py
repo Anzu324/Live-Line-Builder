@@ -1,4 +1,5 @@
 from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget
 
 from live_line_builder.app_mock import mock_data
@@ -64,6 +65,8 @@ class AppController(QObject):
             MainWindow()
         )  # selfをつけ生存期間をAppCOntorollerと同等に延長
 
+        self.set_menubar()
+
         self.main_window.show()  # 表示
 
         tab_names: list[str] = []
@@ -121,3 +124,39 @@ class AppController(QObject):
     #     # ★ シグナルを発火（通知）！
     #     self.product_added.emit(product_data)
     #     self.data_changed.emit()
+
+    def set_menubar(self) -> None:
+        menu_bar = self.main_window.menuBar()
+
+        # --- 1. 階層構造（サブメニュー）の作成 ---
+        file_menu = menu_bar.addMenu("ファイル(&F)")
+
+        new_project = file_menu.addMenu("新規空オブジェクト(&N)")
+
+        # QMenuオブジェクトに対して addMenu() を呼ぶことでネスト可能
+        export_menu = file_menu.addMenu("エクスポート(&E)")
+        export_menu.addAction(QAction("PDF形式...(&P)", self))
+        export_menu.addAction(QAction("PNG画像...(&I)", self))
+
+        file_menu.addSeparator()
+
+        exit_action = QAction("終了(&X)", self)
+        exit_action.triggered.connect(self.main_window.close)
+        file_menu.addAction(exit_action)
+
+        # --- 2. チェックボックス付きQActionの作成 ---
+        view_menu = menu_bar.addMenu("表示(&V)")
+
+        # setCheckable(True) でチェック可能にする
+        grid_action = QAction("グリッドを表示(&G)", self)
+        grid_action.setCheckable(True)
+        grid_action.setChecked(True)  # 初期状態をオンに設定
+
+        # toggled シグナルはチェック状態の変更時(bool)を通知する
+        grid_action.toggled.connect(self.on_grid_toggled)
+
+        view_menu.addAction(grid_action)
+
+    def on_grid_toggled(self, checked: bool):
+        status = "有効" if checked else "無効"
+        print(f"グリッド表示: {status}")

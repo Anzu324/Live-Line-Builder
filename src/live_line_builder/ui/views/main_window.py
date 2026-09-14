@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QFrame, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFrame, QMainWindow, QScrollArea, QVBoxLayout
 
 from live_line_builder.ui.views.plan_sheet_view import (
     PlanSheetView,  # メインコンテンツビューをインポート
@@ -7,7 +7,7 @@ from live_line_builder.ui.views.tabs import WorkSheetTabWidget
 
 
 # メインウィンドウのクラス
-class MainWindow(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()  # 親ウィジェットなしで初期化
 
@@ -21,16 +21,11 @@ class MainWindow(QWidget):
 
         self.v_layout = QVBoxLayout(self)  # 垂直方向のレイアウトを作成
 
-        # ウィジェットの作成と配置
-        self.button = QPushButton(self)  # ボタンの作成
-        self.button.setText("Click Me")  # ボタンのテキストを設定
-        self.button.show()
-
         self.tabs = WorkSheetTabWidget(self)
         self.tabs.setContentsMargins(0, 0, 0, 0)
 
-        self.v_layout.addWidget(self.button)  # レイアウトにボタンを追加
         self.v_layout.addWidget(self.tabs)  # レイアウトにメインコンテンツビューを追加
+        self.setCentralWidget(self.tabs)
 
     def set_central_widget(self, widget: PlanSheetView):
         self.set_tabs([widget])
