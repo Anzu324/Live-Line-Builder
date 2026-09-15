@@ -17,11 +17,16 @@ class PerformanceTabController:
     def set_tabs(self, tabs: list[tuple[str, QWidget, QWidget]]) -> None:
         """タブのタイトルとウィジェットのリストを受け取り、タブを設定する"""
         self._view.clear()  # 既存のタブをクリア
-        for title, widget, graph_widget in tabs:
+        models = self.group_model.get_performace_info_models()
+
+        for index, (title, widget, graph_widget) in enumerate(tabs):
+            if index >= len(models):
+                break
+
             combo_box_tab = ComboBoxTabsView(parent=self._view)
             PerformanceViewSelectorController(
-                combo_box_tab, self.group_model.get_performace_info_model()
+                combo_box_tab, models[index]
             ).set_performance_views([widget, graph_widget])
             self._view.add_new_tab(combo_box_tab)
-            index = self._view.indexOf(combo_box_tab)
-            self._view.setTabText(index, title)
+            tab_index = self._view.indexOf(combo_box_tab)
+            self._view.setTabText(tab_index, title)

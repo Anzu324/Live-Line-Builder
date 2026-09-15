@@ -92,7 +92,7 @@ class AppController(QObject):
         # 今後直してください。そもそもリストを得て欲しい!
         PerformanceTabController(
             self.main_window.tabs,
-            PerformanceGroupModel(group=self._data_mangeger._performance_group_list[0]),
+            PerformanceGroupModel(group=self._data_mangeger._performance_group_list),
         ).set_tabs(list(zip(tab_names, self.worksheet_widgets, self.patch_views)))
 
     # モックでデータマネージャーを構築する
