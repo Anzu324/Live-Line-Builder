@@ -1,0 +1,168 @@
+{
+  "equipments": [
+    {
+      "equip_id": "equip_0001",
+      "name": "MG24/14FX",
+      "equip_type": "Mixer",
+      "quantity": 1,
+      "ports": [
+        {"port_id": "eq1_p01", "name": "Ch 1 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p02", "name": "Ch 2 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p03", "name": "Ch 3 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p04", "name": "Ch 4 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p05", "name": "Ch 5 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p06", "name": "Ch 6 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p07", "name": "Ch 7 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p08", "name": "Ch 8 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq1_p09", "name": "Stereo Out L", "connector": "XLR-M", "flow": "OUT"},
+        {"port_id": "eq1_p10", "name": "Stereo Out R", "connector": "XLR-M", "flow": "OUT"},
+        {"port_id": "eq1_p11", "name": "Aux 1 Out", "connector": "TRS", "flow": "OUT"},
+        {"port_id": "eq1_p12", "name": "Aux 2 Out", "connector": "TRS", "flow": "OUT"}
+      ]
+    },
+    {
+      "equip_id": "equip_0002",
+      "name": "CANARE 12ch",
+      "equip_type": "StageBox",
+      "quantity": 1,
+      "ports": [
+        {"port_id": "eq2_p01", "name": "Ch 1 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq2_p02", "name": "Ch 1 Out", "connector": "XLR-M", "flow": "OUT"},
+        {"port_id": "eq2_p03", "name": "Ch 2 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq2_p04", "name": "Ch 2 Out", "connector": "XLR-M", "flow": "OUT"},
+        {"port_id": "eq2_p05", "name": "Ch 3 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq2_p06", "name": "Ch 3 Out", "connector": "XLR-M", "flow": "OUT"},
+        {"port_id": "eq2_p07", "name": "Ch 4 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq2_p08", "name": "Ch 4 Out", "connector": "XLR-M", "flow": "OUT"}
+      ]
+    },
+    {
+      "equip_id": "equip_0003",
+      "name": "CP20Multi",
+      "equip_type": "StageBox",
+      "quantity": 1,
+      "ports": [
+        {"port_id": "eq3_p01", "name": "Ch 1 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq3_p02", "name": "Ch 1 Out", "connector": "XLR-M", "flow": "OUT"},
+        {"port_id": "eq3_p03", "name": "Ch 2 In", "connector": "XLR-F", "flow": "IN"},
+        {"port_id": "eq3_p04", "name": "Ch 2 Out", "connector": "XLR-M", "flow": "OUT"}
+      ]
+    },
+    {
+      "equip_id": "equip_0004",
+      "name": "SM58",
+      "equip_type": "Microphone",
+      "quantity": 4,
+      "ports": [
+        {"port_id": "eq4_p01", "name": "Out", "connector": "XLR-M", "flow": "OUT"}
+      ]
+    },
+    {
+      "equip_id": "equip_0005",
+      "name": "DI-1",
+      "equip_type": "Instrument",
+      "quantity": 2,
+      "ports": [
+        {"port_id": "eq5_p01", "name": "In", "connector": "TRS", "flow": "IN"},
+        {"port_id": "eq5_p02", "name": "Out", "connector": "XLR-M", "flow": "OUT"}
+      ]
+    }
+  ],
+  "performance_group": [
+    {
+      "_performance_info": {
+        "tab_name": "Day 1",
+        "name": "Summer Music Fest 2026",
+        "place": "Main Stage",
+        "day": "2026-08-01",
+        "live_director": "山田太郎",
+        "sound_director": "佐藤音響",
+        "sound_crews": "鈴木, 田中"
+      },
+      "_audio_patch": {
+        "equipments": [
+          {
+            "equip_id": "patch_eq_vo1",
+            "name": "Vo 1 (SM58)",
+            "equip_type": "Microphone",
+            "ports": [
+              {"port_id": "vo1_out", "name": "Out", "connector": "XLR-M", "flow": "OUT"}
+            ]
+          },
+          {
+            "equip_id": "patch_eq_gt1",
+            "name": "Gt DI (DI-1)",
+            "equip_type": "Instrument",
+            "ports": [
+              {"port_id": "gt1_in", "name": "In", "connector": "TRS", "flow": "IN"},
+              {"port_id": "gt1_out", "name": "Out", "connector": "XLR-M", "flow": "OUT"}
+            ]
+          },
+          {
+            "equip_id": "patch_eq_sb",
+            "name": "StageBox 12ch",
+            "equip_type": "StageBox",
+            "ports": [
+              {"port_id": "sb_in1", "name": "Ch1 In", "connector": "XLR-F", "flow": "IN"},
+              {"port_id": "sb_out1", "name": "Ch1 Out", "connector": "XLR-M", "flow": "OUT"},
+              {"port_id": "sb_in2", "name": "Ch2 In", "connector": "XLR-F", "flow": "IN"},
+              {"port_id": "sb_out2", "name": "Ch2 Out", "connector": "XLR-M", "flow": "OUT"}
+            ]
+          },
+          {
+            "equip_id": "patch_eq_console",
+            "name": "MG24/14FX Console",
+            "equip_type": "Mixer",
+            "ports": [
+              {"port_id": "console_ch1_in", "name": "Ch1 In", "connector": "XLR-F", "flow": "IN"},
+              {"port_id": "console_ch2_in", "name": "Ch2 In", "connector": "XLR-F", "flow": "IN"},
+              {"port_id": "console_st_out_l", "name": "Stereo Out L", "connector": "XLR-M", "flow": "OUT"},
+              {"port_id": "console_st_out_r", "name": "Stereo Out R", "connector": "XLR-M", "flow": "OUT"}
+            ]
+          }
+        ],
+        "connections": [
+          {"from_port_id": "vo1_out", "to_port_id": "sb_in1"},
+          {"from_port_id": "sb_out1", "to_port_id": "console_ch1_in"},
+          {"from_port_id": "gt1_out", "to_port_id": "sb_in2"},
+          {"from_port_id": "sb_out2", "to_port_id": "console_ch2_in"}
+        ]
+      }
+    },
+    {
+      "_performance_info": {
+        "tab_name": "Day 2",
+        "name": "Summer Music Fest 2026 Day2",
+        "place": "Main Stage",
+        "day": "2026-08-02",
+        "live_director": "山田太郎",
+        "sound_director": "佐藤音響",
+        "sound_crews": "鈴木, 高橋"
+      },
+      "_audio_patch": {
+        "equipments": [
+          {
+            "equip_id": "patch_eq_vo1",
+            "name": "Vo 1 (SM58)",
+            "equip_type": "Microphone",
+            "ports": [
+              {"port_id": "vo1_out_d2", "name": "Out", "connector": "XLR-M", "flow": "OUT"}
+            ]
+          },
+          {
+            "equip_id": "patch_eq_console",
+            "name": "MG24/14FX Console",
+            "equip_type": "Mixer",
+            "ports": [
+              {"port_id": "console_ch1_in_d2", "name": "Ch1 In", "connector": "XLR-F", "flow": "IN"}
+            ]
+          }
+        ],
+        "connections": [
+          {"from_port_id": "vo1_out_d2", "to_port_id": "console_ch1_in_d2"}
+        ]
+      }
+    }
+  ]
+}
+

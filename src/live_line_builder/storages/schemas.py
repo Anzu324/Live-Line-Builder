@@ -75,7 +75,7 @@ class PerformanceGroupSchema(BaseModel):
     公演ごとの情報をまとめて持つコンテナ
     """
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
     performance_info: PerformanceSchema = Field(validation_alias="_performance_info")
     audio_patch: AudioPatchSystemSchema = Field(validation_alias="_audio_patch")
 

@@ -6,17 +6,38 @@ from live_line_builder.domain.entities import (
     EquipmentPortEntity,
     PerformanceGroup,
 )
+from live_line_builder.domain.line_graph.audio_patch import (
+    Equipment,
+    EquipmentID,
+    NodeType,
+    Port,
+    PortDirection,
+    PortGender,
+    PortID,
+)
 from live_line_builder.storages.schemas import (
+    AudioPatchSystemSchema,
     EquipmentPortSchema,
     EquipmentSchema,
+    PatchConnectionSchema,
     PatchEquipmentSchema,
+    PatchPortSchema,
     PerformanceGroupSchema,
+    PerformanceSchema,
     ProjectDataSchema,
 )
 
 
-# AIそのまま持ってきた実装(参考用)
 class ProjectRepository:
+    def load_mock(
+        self, mock_file_name: str = "full_mock_data.json"
+    ) -> tuple[EquipmentEntity, EquipmentPortEntity, list[PerformanceGroup]]:
+        """
+        AppMockディレクトリ内のモックJSONを読み込む仮コード(開発・テスト用ヘルパー)
+        """
+        mock_path = Path(__file__).resolve().parent.parent / "app_mock" / mock_file_name
+        return self.load(mock_path)
+
     def load(
         self, file_path: Path
     ) -> tuple[EquipmentEntity, EquipmentPortEntity, list[PerformanceGroup]]:
@@ -38,7 +59,80 @@ class ProjectRepository:
                 port_dict["equip_id"] = equip.equip_id  # 🌟 ここで親のIDを付与！
                 port_rows.append(port_dict)
 
-        return EquipmentEntity(rows=equip_rows), EquipmentPortEntity(rows=port_rows), []
+        # 3. PerformanceGroup の復元
+        performance_groups: list[PerformanceGroup] = []
+        for pg_schema in schema.performance_group:
+            pg = PerformanceGroup()
+
+            # (1) PerformanceInfoEntity の復元
+            info_schema = pg_schema.performance_info
+            if info_schema:
+                pg._performance_info.tab_name = info_schema.tab_name
+                pg._performance_info.name = info_schema.name
+                pg._performance_info.place = info_schema.place
+                pg._performance_info.day = info_schema.day
+                pg._performance_info.live_director = info_schema.live_director
+                pg._performance_info.sound_director = info_schema.sound_director
+                pg._performance_info.sound_crews = info_schema.sound_crews
+
+            # (2) AudioPatchSystem の復元
+            audio_schema = pg_schema.audio_patch
+            if audio_schema:
+                # 機器とポートの登録
+                for eq_schema in audio_schema.equipments:
+                    # NodeTypeの変換（大文字小文字や値のマッチング）
+                    node_type = None
+                    for nt in NodeType:
+                        if (
+                            nt.value.lower() == eq_schema.equip_type.lower()
+                            or nt.name.lower() == eq_schema.equip_type.lower()
+                        ):
+                            node_type = nt
+                            break
+                    if node_type is None:
+                        node_type = NodeType.INSTRUMENT
+
+                    eq = Equipment(
+                        id=EquipmentID(eq_schema.equip_id),
+                        name=eq_schema.name,
+                        type=node_type,
+                    )
+                    pg._audiopath.add_equipment(eq)
+
+                    for port_schema in eq_schema.ports:
+                        direction = (
+                            PortDirection.OUT
+                            if port_schema.flow.upper() == "OUT"
+                            else PortDirection.IN
+                        )
+                        gender = (
+                            PortGender.MALE
+                            if direction == PortDirection.OUT
+                            else PortGender.FEMALE
+                        )
+                        port = Port(
+                            id=PortID(port_schema.port_id),
+                            name=port_schema.name,
+                            direction=direction,
+                            gender=gender,
+                            equipment_id=eq.id,
+                        )
+                        pg._audiopath.add_port(port)
+
+                # 結線 (connections) の復元
+                for conn in audio_schema.connections:
+                    from_id = PortID(conn.from_port_id)
+                    to_id = PortID(conn.to_port_id)
+                    if from_id in pg._audiopath.ports and to_id in pg._audiopath.ports:
+                        pg._audiopath.connect_ports(from_id, to_id)
+
+            performance_groups.append(pg)
+
+        return (
+            EquipmentEntity(rows=equip_rows),
+            EquipmentPortEntity(rows=port_rows),
+            performance_groups,
+        )
 
     def save(
         self,
@@ -75,24 +169,72 @@ class ProjectRepository:
             )
             equip_schemas.append(equip_schema)
 
+        # 3. PerformanceGroup を Pydantic Schema に変換
         performance_group_schemas: list[PerformanceGroupSchema] = []
         for performance_group in performance_groups:
-            equipments = []
-            for equpment in performance_group._audiopath.equipments.values():
-                equipments.append(
-                    PatchEquipmentSchema(
-                        equip_id=equpment.id,
-                        name=equpment.name,
-                        equip_type=str(equpment.type),
-                        ports=[],
+            # PerformanceSchema
+            info = performance_group._performance_info
+            info_schema = PerformanceSchema(
+                tab_name=info.tab_name,
+                name=info.name,
+                place=info.place,
+                day=info.day,
+                live_director=info.live_director,
+                sound_director=info.sound_director,
+                sound_crews=info.sound_crews,
+            )
+
+            # AudioPatchSystemSchema
+            patch_ports_by_eq = defaultdict(list)
+            for port in performance_group._audiopath.ports.values():
+                patch_ports_by_eq[port.equipment_id].append(
+                    PatchPortSchema(
+                        port_id=str(port.id),
+                        name=port.name,
+                        connector="XLR" if port.gender == PortGender.MALE else "XLR-F",
+                        flow=port.direction.value,
                     )
                 )
 
-            # Pydanticにより自動的に中のPerformanceInfoとAudioPatchSystemのSchemaもセットする。
-            performance_group_schemas.append(
-                PerformanceGroupSchema.model_validate(performance_group)
+            patch_equipments = []
+            for equip in performance_group._audiopath.equipments.values():
+                patch_equipments.append(
+                    PatchEquipmentSchema(
+                        equip_id=str(equip.id),
+                        name=equip.name,
+                        equip_type=equip.type.value,
+                        ports=patch_ports_by_eq.get(equip.id, []),
+                    )
+                )
+
+            patch_connections = []
+            for (
+                out_port_id,
+                in_port_ids,
+            ) in performance_group._audiopath.forward_edges.items():
+                for in_port_id in in_port_ids:
+                    patch_connections.append(
+                        PatchConnectionSchema(
+                            from_port_id=str(out_port_id),
+                            to_port_id=str(in_port_id),
+                        )
+                    )
+
+            audio_schema = AudioPatchSystemSchema(
+                equipments=patch_equipments,
+                connections=patch_connections,
             )
 
-        # 3. ファイル書き出し
-        project_schema = ProjectDataSchema(equipments=equip_schemas)
+            performance_group_schemas.append(
+                PerformanceGroupSchema(
+                    performance_info=info_schema,
+                    audio_patch=audio_schema,
+                )
+            )
+
+        # 4. ファイル書き出し
+        project_schema = ProjectDataSchema(
+            equipments=equip_schemas,
+            performance_group=performance_group_schemas,
+        )
         file_path.write_text(project_schema.model_dump_json(indent=2), encoding="utf-8")
