@@ -1,20 +1,52 @@
 from .columns import EQUIPMENT_COLUMNS, EQUIPMENT_PORT_COLUMNS, SETLIST_COLUMNS
-from .table_entity import TableEntity
+from .table_entity import TableEntity, TableRowModel
 
 
-class EquipmentEntity(TableEntity):
+class EquipmentRow(TableRowModel):
+    """機材行モデル"""
+
+    equip_id: str
+    name: str
+    equip_type: str
+    quantity: int = 1
+
+
+class EquipmentPortRow(TableRowModel):
+    """機材ポート行モデル"""
+
+    port_id: str
+    name: str
+    equip_id: str
+    connector: str
+    flow: str
+
+
+class SetListRow(TableRowModel):
+    """セットリスト行モデル"""
+
+    slot: str
+    group: str
+    start: str
+    time: str
+    remark: str = ""
+
+
+class EquipmentEntity(TableEntity[EquipmentRow]):
     """機材情報テーブル"""
 
+    row_type = EquipmentRow
     columns = EQUIPMENT_COLUMNS
 
 
-class EquipmentPortEntity(TableEntity):
+class EquipmentPortEntity(TableEntity[EquipmentPortRow]):
     """機材コネクタ情報テーブル"""
 
+    row_type = EquipmentPortRow
     columns = EQUIPMENT_PORT_COLUMNS
 
 
-class SetListEntity(TableEntity):
+class SetListEntity(TableEntity[SetListRow]):
     """セトリ情報テーブル"""
 
+    row_type = SetListRow
     columns = SETLIST_COLUMNS

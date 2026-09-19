@@ -1,132 +1,171 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, ClassVar, Literal, TypeIs
+from typing import Any, ClassVar
 
-# 📌 型エイリアスの定義
-type RawValue = int | str | bool
-# AllowedType は「型オブジェクトそのもの（intクラス, strクラス, boolクラス）」を表す
-type AllowedType = type[int | str | bool]
-type AllowedTypeName = Literal["int", "str", "bool"]
-
-STR_TO_TYPE: dict[str, AllowedType] = {"int": int, "str": str, "bool": bool}
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 
-# 📌 1. 型チェッカーに「RawValue型であること」を完全に理解させるための関数を追加
-def is_raw_value(val: Any) -> TypeIs[RawValue]:
-    """val が RawValue (int | str | bool) のいずれかであるかを判定する型ガード"""
-    return isinstance(val, (int, str, bool))
+class TableRowModel(BaseModel):
+    """テーブルの1行を表すPydanticベースのモデル基底クラス"""
+
+    model_config = ConfigDict(validate_assignment=True)
+
+    def __getitem__(self, key: str) -> Any:
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            raise KeyError(key)
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        if not hasattr(self, key):
+            raise KeyError(key)
+        setattr(self, key, value)
+
+    def __contains__(self, key: object) -> bool:
+        return isinstance(key, str) and key in type(self).model_fields
+
+    def get(self, key: str, default: Any = None) -> Any:
+        return getattr(self, key, default)
+
+    def to_dict(self) -> dict[str, Any]:
+        """行データを辞書として取得"""
+        return self.model_dump()
 
 
 @dataclass
 class Column:
-    key: str  # 内部での識別子（例: "hp"）
-    header: str  # UIに表示するヘッダー名（例: "体力"）
-    data_type: AllowedType  # 型（例: int, str）
-    default: Any = None  # 初期値
+    key: str  # モデルの属性名（例: "quantity"）
+    header: str  # UIに表示するヘッダー名（例: "数量"）
     editable: bool = True  # UIで編集可能か
+    default: Any = None  # 初期値
 
 
-class TableEntity:
+class TableEntity[RowT: TableRowModel]:
     """columns: テーブル型のエンティティの列を指定。__init__無くとも簡易的に切り替えできる。"""
 
+    row_type: ClassVar[type[Any]] = TableRowModel
     columns: ClassVar[list[Column]] = []
 
-    def __init__(self, rows: list[dict[str, RawValue]] | None = None):
-        # 中身は [{"id": "p01", "name": "頭部", "hp": 100}, ...] のような辞書リスト
-        self.rows: list[dict[str, RawValue]] = rows or []
+    def __init__(self, rows: Sequence[RowT | dict[str, Any]] | None = None):
+        self.rows: list[RowT] = []
+        if rows:
+            for r in rows:
+                if isinstance(r, self.row_type):
+                    self.rows.append(r)
+                elif isinstance(r, dict):
+                    self.rows.append(self.row_type.model_validate(r))
+                else:
+                    self.rows.append(self.row_type.model_validate(r))
 
     def count_column(self) -> int:
         return len(self.columns)
 
-    def get_value(self, row_idx: int, col_idx: int) -> RawValue | None:
-        col_key = self.columns[col_idx].key
-        result = self.rows[row_idx].get(col_key, self.columns[col_idx].default)
+    def column_size(self) -> int:
+        return len(self.columns)
 
-        # ⭕ 作成した型ガード関数を使用
-        if is_raw_value(result):
-            return result
+    def _key_to_col_idx(self, key: str) -> int | None:
+        for idx, col in enumerate(self.columns):
+            if col.key == key:
+                return idx
         return None
 
-    def set_value(self, row_idx: int, col_idx: int, value: RawValue) -> bool:
-        col = self.columns[col_idx]
-        try:
-            # ⭕ col.data_type(value) の動的型変換
-            typed_value = col.data_type(value)
-            # typed_value が RawValue の型を満たしていることを保証
-            if isinstance(typed_value, RawValue.__value__):
-                self.rows[row_idx][col.key] = typed_value
-                return True
+    def get_value(self, row_idx: int, col_idx: int) -> Any:
+        if 0 <= row_idx < len(self.rows) and 0 <= col_idx < len(self.columns):
+            col_key = self.columns[col_idx].key
+            return getattr(self.rows[row_idx], col_key, self.columns[col_idx].default)
+        return None
+
+    def set_value(self, row_idx: int, col_idx: int, value: Any) -> bool:
+        """指定位置のセルに値をセットする。Pydanticによる自動型変換とバリデーションが働く。"""
+        if not (0 <= row_idx < len(self.rows) and 0 <= col_idx < len(self.columns)):
             return False
-        except ValueError, TypeError:  # ⭕ 構文エラーを修正 (タプル化)
+        col = self.columns[col_idx]
+        if not col.editable:
+            return False
+        row = self.rows[row_idx]
+        try:
+            setattr(row, col.key, value)
+            return True
+        except ValueError, TypeError, ValidationError:
             return False
 
-    def __getitem__(self, item: tuple[int, int | str]) -> RawValue | None:
+    def __getitem__(self, item: tuple[int, int | str] | int) -> Any:
         """entity[行, 列(インデックスまたはキー)] によるアクセスを提供"""
         if isinstance(item, tuple) and len(item) == 2:
             row_idx, col = item
+            if not (0 <= row_idx < len(self.rows)):
+                return None
             if isinstance(col, int):
-                col_key = self.columns[col].key
+                if 0 <= col < len(self.columns):
+                    col_key = self.columns[col].key
+                    return getattr(self.rows[row_idx], col_key, None)
+                return None
             else:
-                col_key = col
-            return self.rows[row_idx].get(col_key)
+                return getattr(self.rows[row_idx], col, None)
+        elif isinstance(item, int):
+            return self.rows[item]
         return None
 
-    def get_item(self, row: int, column: str) -> RawValue | None:
+    def get_item(self, row: int, column: str) -> Any:
         return self.__getitem__((row, column))
 
-    def get_row(self, item: int) -> dict[str, RawValue]:
+    def get_row(self, item: int) -> RowT:
         return self.rows[item]
 
-    def __setitem__(
-        self, key: tuple[int, int | str] | int, value: RawValue | dict[str, RawValue]
-    ) -> None:
-        """entity[行, 列] = 値、または entity[行] = 辞書 の両方に対応"""
+    def __setitem__(self, key: tuple[int, int | str] | int, value: Any) -> None:
+        """entity[行, 列] = 値、または entity[行] = 行モデル/辞書 の両方に対応"""
         if isinstance(key, tuple) and len(key) == 2:
             row_idx, col = key
             if isinstance(col, int):
-                col_key = self.columns[col].key
+                self.set_value(row_idx, col, value)
             else:
-                col_key = col
-
-            # ⭕ 作成した型ガード関数を使用
-            # これにより、型チェッカーはこの if 文の中で value を「100% RawValue 型」と認識します
-            if is_raw_value(value):
-                self.rows[row_idx][col_key] = value
-
+                col_idx = self._key_to_col_idx(col)
+                if col_idx is not None:
+                    self.set_value(row_idx, col_idx, value)
+                elif 0 <= row_idx < len(self.rows):
+                    try:
+                        setattr(self.rows[row_idx], col, value)
+                    except ValueError, TypeError, ValidationError:
+                        pass
         elif isinstance(key, int):
-            # ⭕ 行丸ごとの置換（value が辞書である必要がある）
-            if isinstance(value, dict):
+            if isinstance(value, self.row_type):
                 self.rows[key] = value
+            elif isinstance(value, dict):
+                self.rows[key] = self.row_type.model_validate(value)
 
-    def set_row(self, row: int, value: dict[str, RawValue]) -> None:
-        if row < 0 or row >= len(self.rows):
-            return
-        self.rows[row] = value
+    def set_row(self, row: int, value: RowT | dict[str, Any]) -> None:
+        if 0 <= row < len(self.rows):
+            if isinstance(value, self.row_type):
+                self.rows[row] = value
+            elif isinstance(value, dict):
+                self.rows[row] = self.row_type.model_validate(value)
 
-    def append_row(self, value: dict[str, RawValue]) -> None:
-        self.rows.append(value)
+    def append_row(self, value: RowT | dict[str, Any]) -> None:
+        if isinstance(value, self.row_type):
+            self.rows.append(value)
+        elif isinstance(value, dict):
+            self.rows.append(self.row_type.model_validate(value))
 
-    def insert(self, index: int, object: dict[str, RawValue]) -> None:
-        self.rows.insert(index, object)
+    def insert(self, index: int, object: RowT | dict[str, Any]) -> None:
+        if isinstance(object, self.row_type):
+            self.rows.insert(index, object)
+        elif isinstance(object, dict):
+            self.rows.insert(index, self.row_type.model_validate(object))
 
     def __delitem__(self, key: int) -> None:
-        if key < 0 or key >= len(self.rows):
-            return
-        self.rows.__delitem__(key)
+        if 0 <= key < len(self.rows):
+            del self.rows[key]
 
     def __len__(self) -> int:
         return len(self.rows)
 
-    def column_size(self) -> int:
-        return len(self.columns)
-
 
 def zip_column_key_and_table(
     keys: list[str],
-    values: Sequence[Sequence[RawValue]],  # ⭕ list から Sequence に変更（共変にする）
-) -> list[dict[str, RawValue]]:
+    values: Sequence[Sequence[Any]],
+) -> list[dict[str, Any]]:
     """外部データを TableEntity 用の辞書リストに変換するヘルパー関数"""
-    dic: list[dict[str, RawValue]] = []
+    dic: list[dict[str, Any]] = []
     for i in values:
         dic.append(dict(zip(keys, i)))
     return dic

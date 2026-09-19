@@ -1,5 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
+from typing import Any
 
 from live_line_builder.domain.entities import (
     EquipmentEntity,
@@ -110,14 +111,14 @@ class ProjectRepository:
                             if direction == PortDirection.OUT
                             else PortGender.FEMALE
                         )
-                        port = Port(
+                        audio_port = Port(
                             id=PortID(port_schema.port_id),
                             name=port_schema.name,
                             direction=direction,
                             gender=gender,
                             equipment_id=eq.id,
                         )
-                        pg._audiopath.add_port(port)
+                        pg._audiopath.add_port(audio_port)
 
                 # 結線 (connections) の復元
                 for conn in audio_schema.connections:
@@ -145,8 +146,7 @@ class ProjectRepository:
         # 1. Portデータを equip_id ごとにグループ化しておく
         ports_by_equip = defaultdict(list)
         for port_row in port_table.rows:
-            # Pydantic化する前に equip_id を除去したコピーを作成
-            port_data = port_row.copy()
+            port_data: dict[str, Any] = port_row.model_dump()
             equip_id = port_data.pop("equip_id", None)
 
             if equip_id:
@@ -157,11 +157,12 @@ class ProjectRepository:
         # 2. Equipment と グループ化した Port を結合して Pydantic Schema を作成
         equip_schemas = []
         for equip_row in equip_table.rows:
-            equip_id = equip_row["equip_id"]
+            equip_data: dict[str, Any] = equip_row.model_dump()
+            equip_id = equip_data["equip_id"]
 
             equip_schema = EquipmentSchema.model_validate(
                 {
-                    **equip_row,
+                    **equip_data,
                     "ports": ports_by_equip.get(
                         equip_id, []
                     ),  # 該当するPortのリストをセット
