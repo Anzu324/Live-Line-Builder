@@ -1,12 +1,18 @@
 {
-    "pylint.enabled": false,
-      // Linter（ruffを使う場合）
-    "[python]": {
+  "pylint.enabled": false,
+  // Pythonファイルに対する保存時アクションとフォーマッタの設定
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.organizeImports": "explicit"
-    },
-    "editor.defaultFormatter": "charliermarsh.ruff"
-    },
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+
+  // Pylance（言語サーバー・型チェック）の設定
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.inlayHints.variableTypes": true
 }
