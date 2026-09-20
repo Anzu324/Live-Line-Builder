@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypeVar, cast
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
@@ -40,22 +40,27 @@ class Column:
     default: Any = None  # 初期値
 
 
+RowT = TypeVar("RowT", bound=TableRowModel)
+
+
 class TableEntity[RowT: TableRowModel]:
     """columns: テーブル型のエンティティの列を指定。__init__無くとも簡易的に切り替えできる。"""
 
-    row_type: ClassVar[type[Any]] = TableRowModel
+    row_type: ClassVar[type[TableRowModel]] = TableRowModel
     columns: ClassVar[list[Column]] = []
+
+    def _coerce_row(self, value: RowT | dict[str, Any]) -> RowT:
+        if isinstance(value, self.row_type):
+            return cast(RowT, value)
+        if isinstance(value, dict):
+            return cast(RowT, self.row_type.model_validate(value))
+        raise TypeError(f"Unsupported row value: {type(value)!r}")
 
     def __init__(self, rows: Sequence[RowT | dict[str, Any]] | None = None):
         self.rows: list[RowT] = []
         if rows:
-            for r in rows:
-                if isinstance(r, self.row_type):
-                    self.rows.append(r)
-                elif isinstance(r, dict):
-                    self.rows.append(self.row_type.model_validate(r))
-                else:
-                    self.rows.append(self.row_type.model_validate(r))
+            for raw_row in rows:
+                self.rows.append(self._coerce_row(raw_row))
 
     def count_column(self) -> int:
         return len(self.columns)
@@ -128,29 +133,18 @@ class TableEntity[RowT: TableRowModel]:
                     except ValueError, TypeError, ValidationError:
                         pass
         elif isinstance(key, int):
-            if isinstance(value, self.row_type):
-                self.rows[key] = value
-            elif isinstance(value, dict):
-                self.rows[key] = self.row_type.model_validate(value)
+            if 0 <= key < len(self.rows):
+                self.rows[key] = self._coerce_row(value)
 
     def set_row(self, row: int, value: RowT | dict[str, Any]) -> None:
         if 0 <= row < len(self.rows):
-            if isinstance(value, self.row_type):
-                self.rows[row] = value
-            elif isinstance(value, dict):
-                self.rows[row] = self.row_type.model_validate(value)
+            self.rows[row] = self._coerce_row(value)
 
     def append_row(self, value: RowT | dict[str, Any]) -> None:
-        if isinstance(value, self.row_type):
-            self.rows.append(value)
-        elif isinstance(value, dict):
-            self.rows.append(self.row_type.model_validate(value))
+        self.rows.append(self._coerce_row(value))
 
     def insert(self, index: int, object: RowT | dict[str, Any]) -> None:
-        if isinstance(object, self.row_type):
-            self.rows.insert(index, object)
-        elif isinstance(object, dict):
-            self.rows.insert(index, self.row_type.model_validate(object))
+        self.rows.insert(index, self._coerce_row(object))
 
     def __delitem__(self, key: int) -> None:
         if 0 <= key < len(self.rows):

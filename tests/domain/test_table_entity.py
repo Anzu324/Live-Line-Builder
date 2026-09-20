@@ -150,3 +150,68 @@ def test_setlist_entity():
     row = setlist.get_row(0)
     assert isinstance(row, SetListRow)
     assert row.group == "Band A"
+
+
+def test_table_entity_coerces_dict_rows_to_row_model():
+    """辞書のまま受け取った行データが RowT に正規化されることを確認する"""
+    entity = EquipmentEntity(
+        rows=[
+            {
+                "equip_id": "eq01",
+                "name": "Mic A",
+                "equip_type": "Mic",
+                "quantity": "3",
+            }
+        ]
+    )
+
+    assert len(entity) == 1
+    assert isinstance(entity.get_row(0), EquipmentRow)
+    assert entity.get_row(0).quantity == 3
+    assert isinstance(entity.get_row(0).quantity, int)
+
+    entity.append_row(
+        {
+            "equip_id": "eq02",
+            "name": "Amp B",
+            "equip_type": "Amp",
+            "quantity": "2",
+        }
+    )
+
+    assert isinstance(entity.get_row(1), EquipmentRow)
+    assert entity.get_row(1).quantity == 2
+
+
+def test_table_entity_coerces_dict_assignment_and_rejects_invalid_values():
+    """代入経路でも dict を RowT に変換し、無効な値はバリデーションで拒否する"""
+    entity = EquipmentEntity(
+        rows=[
+            {
+                "equip_id": "eq01",
+                "name": "Mic A",
+                "equip_type": "Mic",
+                "quantity": 1,
+            }
+        ]
+    )
+
+    entity[0] = {
+        "equip_id": "eq02",
+        "name": "Mic B",
+        "equip_type": "Mic",
+        "quantity": "5",
+    }
+
+    assert isinstance(entity.get_row(0), EquipmentRow)
+    assert entity[0, "equip_id"] == "eq02"
+    assert entity[0, "quantity"] == 5
+    assert isinstance(entity[0, "quantity"], int)
+
+    with pytest.raises(ValidationError):
+        entity.set_row(
+            0,
+            {"equip_id": "eq03", "name": "Bad", "equip_type": "Mic", "quantity": "abc"},
+        )
+
+    assert entity[0, "quantity"] == 5
