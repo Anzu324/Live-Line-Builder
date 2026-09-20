@@ -3,18 +3,18 @@ from pathlib import Path
 from typing import Any
 
 from live_line_builder.domain.entities import (
-    EquipmentEntity,
-    EquipmentPortEntity,
+    EquipmentDefinition,
+    EquipmentPortDefinition,
     PerformanceGroup,
 )
 from live_line_builder.domain.line_graph.audio_patch import (
-    Equipment,
     EquipmentID,
+    EquipmentInstance,
     NodeType,
-    Port,
     PortDirection,
     PortGender,
     PortID,
+    PortInstance,
 )
 from live_line_builder.storages.schemas import (
     AudioPatchSystemSchema,
@@ -32,7 +32,7 @@ from live_line_builder.storages.schemas import (
 class ProjectRepository:
     def load_mock(
         self, mock_file_name: str = "full_mock_data.json"
-    ) -> tuple[EquipmentEntity, EquipmentPortEntity, list[PerformanceGroup]]:
+    ) -> tuple[EquipmentDefinition, EquipmentPortDefinition, list[PerformanceGroup]]:
         """
         AppMockディレクトリ内のモックJSONを読み込む仮コード(開発・テスト用ヘルパー)
         """
@@ -41,7 +41,7 @@ class ProjectRepository:
 
     def load(
         self, file_path: Path
-    ) -> tuple[EquipmentEntity, EquipmentPortEntity, list[PerformanceGroup]]:
+    ) -> tuple[EquipmentDefinition, EquipmentPortDefinition, list[PerformanceGroup]]:
         """JSON(ネスト) ➔ Entity(フラット)"""
         json_str = file_path.read_text(encoding="utf-8")
         schema = ProjectDataSchema.model_validate_json(json_str)
@@ -93,7 +93,7 @@ class ProjectRepository:
                     if node_type is None:
                         node_type = NodeType.INSTRUMENT
 
-                    eq = Equipment(
+                    eq = EquipmentInstance(
                         id=EquipmentID(eq_schema.equip_id),
                         name=eq_schema.name,
                         type=node_type,
@@ -111,7 +111,7 @@ class ProjectRepository:
                             if direction == PortDirection.OUT
                             else PortGender.FEMALE
                         )
-                        audio_port = Port(
+                        audio_port = PortInstance(
                             id=PortID(port_schema.port_id),
                             name=port_schema.name,
                             direction=direction,
@@ -130,16 +130,16 @@ class ProjectRepository:
             performance_groups.append(pg)
 
         return (
-            EquipmentEntity(rows=equip_rows),
-            EquipmentPortEntity(rows=port_rows),
+            EquipmentDefinition(rows=equip_rows),
+            EquipmentPortDefinition(rows=port_rows),
             performance_groups,
         )
 
     def save(
         self,
         file_path: Path,
-        equip_table: EquipmentEntity,
-        port_table: EquipmentPortEntity,
+        equip_table: EquipmentDefinition,
+        port_table: EquipmentPortDefinition,
         performance_groups: list[PerformanceGroup],
     ):
         """Entity(フラット) ➔ JSON(ネスト)"""

@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 
 from live_line_builder.domain.entities import (
-    EquipmentEntity,
-    EquipmentPortEntity,
+    EquipmentDefinition,
+    EquipmentPortDefinition,
     PerformanceGroup,
 )
 from live_line_builder.domain.line_graph.audio_patch import NodeType
@@ -20,8 +20,8 @@ def test_load_mock_data_structure(repository):
     """load_mock() を呼び出して、各EntityおよびPerformanceGroupが取得できるかテスト"""
     equip_entity, port_entity, perf_groups = repository.load_mock()
 
-    assert isinstance(equip_entity, EquipmentEntity)
-    assert isinstance(port_entity, EquipmentPortEntity)
+    assert isinstance(equip_entity, EquipmentDefinition)
+    assert isinstance(port_entity, EquipmentPortDefinition)
     assert isinstance(perf_groups, list)
     assert len(perf_groups) == 2
 

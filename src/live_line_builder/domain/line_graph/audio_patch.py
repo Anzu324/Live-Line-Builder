@@ -34,7 +34,7 @@ class PortGender(Enum):
 
 
 @dataclass
-class Port:
+class PortInstance:
     id: PortID
     name: str
     direction: PortDirection
@@ -44,7 +44,7 @@ class Port:
 
 
 @dataclass
-class Equipment:
+class EquipmentInstance:
     id: EquipmentID
     name: str
     type: NodeType
@@ -59,8 +59,8 @@ class AudioPatchSystem:
     """音響回線の状態管理とパッチング操作を提供するコアシステム"""
 
     def __init__(self) -> None:
-        self.equipments: dict[EquipmentID, Equipment] = {}
-        self.ports: dict[PortID, Port] = {}
+        self.equipments: dict[EquipmentID, EquipmentInstance] = {}
+        self.ports: dict[PortID, PortInstance] = {}
 
         # グラフ接続情報
         self.forward_edges: dict[
@@ -69,15 +69,15 @@ class AudioPatchSystem:
         self.backward_edges: dict[PortID, PortID] = {}  # IN_port_id -> OUT_port_id
 
     # --- 単純な内部補助関数 ---
-    def _get_equipment_id(self, port_id) -> Equipment:
+    def _get_equipment_id(self, port_id) -> EquipmentInstance:
         return self.equipments[self.ports[port_id].equipment_id]
 
     # --- 登録・基本操作 ---
 
-    def add_equipment(self, eq: Equipment) -> None:
+    def add_equipment(self, eq: EquipmentInstance) -> None:
         self.equipments[eq.id] = eq
 
-    def add_port(self, port: Port) -> None:
+    def add_port(self, port: PortInstance) -> None:
         self.ports[port.id] = port
         if port.direction == PortDirection.OUT:
             # 出力側なら受け手のリストを作成
@@ -175,7 +175,7 @@ class AudioPatchSystem:
 
     def auto_patch_mixer_from_stagebox(
         self, mixer_in_port_id: PortID, stagebox_eq_id: PortID, ch_no: int
-    ) -> Equipment | None:
+    ) -> EquipmentInstance | None:
         """マルチの番号を指定してミキサーに繋ぐ。成功した場合、上流の楽器を返す。"""
         sb_out_port = next(
             (
@@ -204,7 +204,7 @@ class AudioPatchSystem:
 
     def auto_patch_mixer_from_instrument(
         self, mixer_in_port_id: PortID, instrument_eq_id: PortID
-    ) -> Port:
+    ) -> PortInstance:
         """楽器を指定し、マルチを経由してミキサーに繋ぐ。成功した場合、経由したマルチのポートを返す。"""
         out_ports = [
             p

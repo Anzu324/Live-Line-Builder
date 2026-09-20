@@ -2,7 +2,10 @@ from typing import Any
 
 from PySide6.QtCore import QAbstractTableModel, Qt
 
-from live_line_builder.domain.entities import EquipmentEntity, EquipmentPortEntity
+from live_line_builder.domain.entities import (
+    EquipmentDefinition,
+    EquipmentPortDefinition,
+)
 
 """
 ここのモデルは機器の情報であってライブでどのように接続するかの情報でない。
@@ -12,7 +15,7 @@ from live_line_builder.domain.entities import EquipmentEntity, EquipmentPortEnti
 
 # 各機材の情報を保持するモデルクラス
 class EquipmentModel(QAbstractTableModel):
-    def __init__(self, data: EquipmentEntity, parent=None):
+    def __init__(self, data: EquipmentDefinition, parent=None):
         super().__init__(parent)
         self._data = data
 
@@ -66,7 +69,7 @@ class EquipmentModel(QAbstractTableModel):
 
 # 各機材の各コネクタの情報を保持するモデルクラス
 class EquipmentPortModel(QAbstractTableModel):
-    def __init__(self, data: EquipmentPortEntity, parent=None):
+    def __init__(self, data: EquipmentPortDefinition, parent=None):
         super().__init__(parent)
         self._data = data
 

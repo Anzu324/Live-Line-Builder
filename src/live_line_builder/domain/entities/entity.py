@@ -3,7 +3,7 @@ from .table_entity import TableEntity, TableRowModel
 
 
 class EquipmentRow(TableRowModel):
-    """機材行モデル"""
+    """機材行モデルの列"""
 
     equip_id: str
     name: str
@@ -31,14 +31,14 @@ class SetListRow(TableRowModel):
     remark: str = ""
 
 
-class EquipmentEntity(TableEntity[EquipmentRow]):
+class EquipmentDefinition(TableEntity[EquipmentRow]):
     """機材情報テーブル"""
 
     row_type = EquipmentRow
     columns = EQUIPMENT_COLUMNS
 
 
-class EquipmentPortEntity(TableEntity[EquipmentPortRow]):
+class EquipmentPortDefinition(TableEntity[EquipmentPortRow]):
     """機材コネクタ情報テーブル"""
 
     row_type = EquipmentPortRow

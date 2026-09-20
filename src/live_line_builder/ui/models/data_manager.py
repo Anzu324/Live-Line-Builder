@@ -4,8 +4,8 @@ from PySide6.QtCore import QObject, Signal
 
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import (
-    EquipmentEntity,
-    EquipmentPortEntity,
+    EquipmentDefinition,
+    EquipmentPortDefinition,
     PerformanceGroup,
 )
 from live_line_builder.domain.entities.columns import (
@@ -24,8 +24,8 @@ class DataManager(QObject):
 
     call_reload_all_ui = Signal()
 
-    _equipment_entity: EquipmentEntity
-    _equipment_port_entity: EquipmentPortEntity
+    _equipment_entity: EquipmentDefinition
+    _equipment_port_entity: EquipmentPortDefinition
     _performance_group_list: list[PerformanceGroup]
 
     def __init__(
@@ -38,12 +38,12 @@ class DataManager(QObject):
         super().__init__(parent)
         temp = [i.key for i in EQUIPMENT_COLUMNS]
         if not (equipment_list is None):
-            self._equipment_entity = EquipmentEntity(
+            self._equipment_entity = EquipmentDefinition(
                 zip_column_key_and_table(temp, equipment_list)
             )
         temp = [i.key for i in EQUIPMENT_PORT_COLUMNS]
         if not (equipment_ports is None):
-            self._equipment_port_entity = EquipmentPortEntity(
+            self._equipment_port_entity = EquipmentPortDefinition(
                 zip_column_key_and_table(temp, equipment_ports)
             )
 
@@ -54,11 +54,11 @@ class DataManager(QObject):
         return DataManager(None, mock_data.equipment_data, mock_data.port_data)
 
     @property
-    def equipment_entity(self) -> EquipmentEntity:
+    def equipment_entity(self) -> EquipmentDefinition:
         return self._equipment_entity
 
     @property
-    def equipment_port_entity(self) -> EquipmentPortEntity:
+    def equipment_port_entity(self) -> EquipmentPortDefinition:
         return self._equipment_port_entity
 
     def load_projetct_from_save_data(self, file_path: Path):

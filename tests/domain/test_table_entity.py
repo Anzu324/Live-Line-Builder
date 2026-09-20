@@ -2,8 +2,8 @@ import pytest
 from pydantic import ValidationError
 
 from live_line_builder.domain.entities import (
-    EquipmentEntity,
-    EquipmentPortEntity,
+    EquipmentDefinition,
+    EquipmentPortDefinition,
     EquipmentPortRow,
     EquipmentRow,
     SetListEntity,
@@ -60,7 +60,7 @@ def test_equipment_row_dict_compatibility():
 def test_table_entity_init_and_access():
     """TableEntityの初期化とアクセスのテスト"""
     # 辞書のリストから初期化できる
-    entity = EquipmentEntity(
+    entity = EquipmentDefinition(
         rows=[
             {"equip_id": "eq01", "name": "Mic A", "equip_type": "Mic", "quantity": "3"},
             {"equip_id": "eq02", "name": "Amp B", "equip_type": "Amp", "quantity": 1},
@@ -84,7 +84,7 @@ def test_table_entity_init_and_access():
 
 def test_table_entity_set_value_type_coercion_and_validation():
     """set_value による型変換と不正値の拒否テスト"""
-    entity = EquipmentEntity(
+    entity = EquipmentDefinition(
         rows=[
             {"equip_id": "eq01", "name": "Mic A", "equip_type": "Mic", "quantity": 1},
         ]
@@ -113,7 +113,7 @@ def test_table_entity_set_value_type_coercion_and_validation():
 
 def test_equipment_port_entity():
     """EquipmentPortEntity のテスト"""
-    port_entity = EquipmentPortEntity(
+    port_entity = EquipmentPortDefinition(
         rows=[
             {
                 "port_id": "p01",
@@ -154,7 +154,7 @@ def test_setlist_entity():
 
 def test_table_entity_coerces_dict_rows_to_row_model():
     """辞書のまま受け取った行データが RowT に正規化されることを確認する"""
-    entity = EquipmentEntity(
+    entity = EquipmentDefinition(
         rows=[
             {
                 "equip_id": "eq01",
@@ -185,7 +185,7 @@ def test_table_entity_coerces_dict_rows_to_row_model():
 
 def test_table_entity_coerces_dict_assignment_and_rejects_invalid_values():
     """代入経路でも dict を RowT に変換し、無効な値はバリデーションで拒否する"""
-    entity = EquipmentEntity(
+    entity = EquipmentDefinition(
         rows=[
             {
                 "equip_id": "eq01",

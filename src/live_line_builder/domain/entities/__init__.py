@@ -1,6 +1,6 @@
 from .entity import (
-    EquipmentEntity,
-    EquipmentPortEntity,
+    EquipmentDefinition,
+    EquipmentPortDefinition,
     EquipmentPortRow,
     EquipmentRow,
     SetListEntity,
@@ -13,8 +13,8 @@ from .table_entity import Column, TableEntity, TableRowModel
 
 __all__ = [
     "Column",
-    "EquipmentEntity",
-    "EquipmentPortEntity",
+    "EquipmentDefinition",
+    "EquipmentPortDefinition",
     "EquipmentPortRow",
     "EquipmentRow",
     "PerformanceGroup",
