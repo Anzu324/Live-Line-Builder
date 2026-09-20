@@ -16,32 +16,30 @@
 title: 回線関係のリレーション
 ---
 erDiagram
-    EquipmentEntity ||--o{ EquipmentPortEntity : "ポート"
-    EquipmentEntity {
+    EquipmentDefinition ||--o{ EquipmentPortDefinition : "ポート"
+    EquipmentDefinition {
         id equip_id
         str name
         str node_type
         int quantity
     }
-    EquipmentPortEntity {
+    EquipmentPortDefinition {
         id port_id
         str name
         float pricePerUnit
     }
-    Equipment ||--o{ EquipmentPort : "Portを参照"
-    Equipment {
-    id equip_node_id
-    id performance
+    EquipmentInstance ||--o{ PortInstance : "Portを参照"
+    EquipmentInstance {
+        id equip_node_id
+        id performance
     }
-    EquipmentPort {
+    PortInstance {
 	    id port_node_id
 	    id equip_node_id
 	    PortDirection direction
 	    id equipment_id
     }
-    EquipmentEntity ||--o{ Equipment : "参考にする"
-    PerformaceEntity ||--o{ Equipment : "どの公演の話なのか"
-
+    EquipmentDefinition ||--o{ EquipmentInstance : "参考にする"
 
 ```
 
@@ -57,16 +55,19 @@ class TableEntity{
     +setData(row,column,context) bool
 }
 
-TableEntity <|-- EquipmentEntity
-TableEntity <|-- EquipmentPortEntity
+TableEntity <|-- EquipmentDefinition
+TableEntity <|-- EquipmentPortDefinition
 
-DataManger o-- EquipmentEntity
-DataManger o-- EquipmentPortEntity
-DataManger o-- AudioPatchSystem
-AudioPatchSystem *-- Equipment
-AudioPatchSystem *-- EquipmentPort
-EquipmentEntity <-- Equipment
-Equipment <--EquipmentPort
+DataManger o-- EquipmentDefinition
+DataManger o-- EquipmentPortDefinition
+DataManger o-- PerformanceGroup
+PerformanceGroup *--AudioPatchSystem
+
+AudioPatchSystem *-- EquipmentInstance
+AudioPatchSystem *-- PortInstance
+EquipmentDefinition <-- EquipmentInstance
+EquipmentInstance <--PortInstance
+EquipmentPortDefinition <--PortInstance
 ```
 
 

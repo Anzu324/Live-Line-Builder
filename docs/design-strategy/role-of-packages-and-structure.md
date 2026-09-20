@@ -18,3 +18,27 @@ AppContorollerでは収まらない部分に関しては実装している。あ
 JSONとの相互変換やzip化ファイル保存・読み込みに関する機能を配置する。
 # app_mock
 .pyで書かれたモックデータを置いている。場所については要検討であるがひとまずこちらに置いている。
+
+# structure
+```Mermaid
+---
+title: System Structure
+---
+graph TD
+    subgraph UI
+    direction LR
+    Controller --> View
+    Controller --> Model
+    View -- Controller\nより割り当て --> Model
+    Controller -->DataManager
+    Model --> DataManager
+    end
+    Model --> Entity
+    DataManager ==> Entity
+    User@{ shape: hex, label: "User" } --> View
+
+    Repository --> Entity
+    Repository --> Schema
+    DataManager -- 保存時に使用 --> Repository
+
+```
