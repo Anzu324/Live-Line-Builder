@@ -44,7 +44,14 @@ RowT = TypeVar("RowT", bound=TableRowModel)
 
 
 class TableEntity[RowT: TableRowModel]:
-    """columns: テーブル型のエンティティの列を指定。__init__無くとも簡易的に切り替えできる。"""
+    """Table型のエンティティを保持する。継承により具体化して使う。
+    
+    継承時は__init__無くとも簡易的に切り替えできる。
+    
+    Attributes:
+    columns (list[Column]): テーブル型のエンティティの列の属性を指定。
+    row_type (TableRowModel): 各行のデータ構造を指定。
+    """
 
     row_type: ClassVar[type[TableRowModel]] = TableRowModel
     columns: ClassVar[list[Column]] = []
