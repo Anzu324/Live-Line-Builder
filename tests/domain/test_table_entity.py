@@ -1,3 +1,9 @@
+"""
+このテストモジュールではTableEntity及びその派生Entityについてテストを行います。
+TableEntityはその設計上派生する必要があります。
+そのため、TableEntity自体のテストは主にEquipmentDefinitionを用いてテストを行います。
+"""
+
 import pytest
 from pydantic import ValidationError
 
@@ -112,7 +118,7 @@ def test_table_entity_set_value_type_coercion_and_validation():
 
 
 def test_equipment_port_entity():
-    """EquipmentPortEntity のテスト"""
+    """EquipmentPortDefinition のテスト"""
     port_entity = EquipmentPortDefinition(
         rows=[
             {
