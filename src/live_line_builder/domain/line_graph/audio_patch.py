@@ -51,8 +51,7 @@ class EquipmentInstance:
 
 
 class WrongPortConnectionError(ValueError):
-    def __str__(self):
-        return "例外クラス：MyException"
+    pass
 
 
 @dataclass

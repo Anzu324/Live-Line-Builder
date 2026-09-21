@@ -8,6 +8,7 @@ from live_line_builder.domain.line_graph.audio_patch import (
     PortDirection,
     PortGender,
     PortInstance,
+    WrongPortConnectionError,
 )
 
 
@@ -102,11 +103,15 @@ def test_connect_ports_success(patch_system):
 def test_connect_ports_same_direction_error(patch_system):
     """同属性（OUT同士、IN同士）の接続でエラーが発生するか"""
     # OUT同士
-    with pytest.raises(ValueError, match="同属性（OUT同士）は接続できません。"):
+    with pytest.raises(
+        WrongPortConnectionError, match="同属性（OUT同士）は接続できません。"
+    ):
         patch_system.connect_ports(VO_OUT, LG_OUT)
 
     # IN同士
-    with pytest.raises(ValueError, match="同属性（IN同士）は接続できません。"):
+    with pytest.raises(
+        WrongPortConnectionError, match="同属性（IN同士）は接続できません。"
+    ):
         patch_system.connect_ports(SB_IN1, SB_IN2)
 
 
@@ -198,11 +203,13 @@ def test_auto_patch_mixer_from_instrument_not_connected(patch_system):
 def test_auto_patch_mixer_from_instrument_no_out_ports(patch_system):
     """【異常系】出力ポートを持たない楽器を指定した場合のエラー"""
     # 出力ポートを持たないダミー楽器を追加
-    patch_system.add_equipment(
+    patch_system._add_equipment(
         EquipmentInstance(EquipmentID("eq_dummy"), "Dummy", NodeType.INSTRUMENT)
     )
 
-    with pytest.raises(ValueError, match="指定された楽器に出力ポートが存在しません。"):
+    with pytest.raises(
+        WrongPortConnectionError, match="指定された楽器に出力ポートが存在しません。"
+    ):
         patch_system.auto_patch_mixer_from_instrument(
             mixer_in_port_id=MIX_IN2, instrument_eq_id=EquipmentID("eq_dummy")
         )
