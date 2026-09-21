@@ -55,7 +55,7 @@ class DataManager(QObject):
         dm = DataManager()
         dm.load_mock_project()
         return dm
-        #return DataManager(None, mock_data.equipment_data, mock_data.port_data)
+        # return DataManager(None, mock_data.equipment_data, mock_data.port_data)
 
     @property
     def equipment_entity(self) -> EquipmentDefinition:
@@ -78,8 +78,8 @@ class DataManager(QObject):
 
     def load_mock_project(self, mock_file_name: str = "full_mock_data.json"):
         repository = ProjectRepository()
-        equipment_entity, equipment_port_entity, performance_groups = repository.load_mock(
-            mock_file_name
+        equipment_entity, equipment_port_entity, performance_groups = (
+            repository.load_mock(mock_file_name)
         )
         self._equipment_entity = equipment_entity
         self._equipment_port_entity = equipment_port_entity

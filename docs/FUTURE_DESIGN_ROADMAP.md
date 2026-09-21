@@ -38,15 +38,15 @@
 from dataclasses import dataclass
 from typing import Optional
 
+
 @dataclass
 class EquipmentDefinition:
     id: str
     vendor: str
     model_name: str
     ports: list[PortDefinition]
-    internal_links: list['InternalLink']
+    internal_links: list["InternalLink"]
     max_quantity: Optional[int] = None  # 持ち込み上限数
-
 ```
 
 ---
@@ -110,15 +110,15 @@ class PathSegment:
     port_name: str
     equipment_category: str
 
+
 @dataclass
 class SignalPath:
     path_id: str
-    source_name: str             # 音源/楽器名 (例: "Dr.Kick", "Fa-07")
-    source_instance_id: str     # 音源の機材ID
-    mic_or_di: Optional[str]     # 使用マイク/DI名
-    segments: list[PathSegment] # 経路上の通過ノード順序リスト
-    is_pa_send: bool = True     # メインPA送りか、モニター等か
-
+    source_name: str  # 音源/楽器名 (例: "Dr.Kick", "Fa-07")
+    source_instance_id: str  # 音源の機材ID
+    mic_or_di: Optional[str]  # 使用マイク/DI名
+    segments: list[PathSegment]  # 経路上の通過ノード順序リスト
+    is_pa_send: bool = True  # メインPA送りか、モニター等か
 ```
 
 

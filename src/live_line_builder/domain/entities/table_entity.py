@@ -161,7 +161,7 @@ class TableEntity[RowT: TableRowModel]:
         return len(self.rows)
 
     def __repr__(self) -> str:
-            return f"TableEntity(ClassName={self.__class__.__name__}, Column❇={self.columns}, rows={len(self.rows)}\n)"
+        return f"TableEntity(ClassName={self.__class__.__name__}, Column❇={self.columns}, rows={len(self.rows)}\n)"
 
 
 def zip_column_key_and_table(

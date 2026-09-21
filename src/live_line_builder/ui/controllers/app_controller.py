@@ -20,8 +20,7 @@ from live_line_builder.ui.views import AudioPatchTableView, MainWindow, PlanShee
 
 # ★ QObject を継承する
 class AppController(QObject):
-    """main_windowに代わってModel,View,Controllerを生成し組み立て、配線するまでを担当。
-    """
+    """main_windowに代わってModel,View,Controllerを生成し組み立て、配線するまでを担当。"""
 
     # ★ カスタムシグナルの定義（QObject の直下に書く）
     data_changed = Signal()  # 引数なしの通知
@@ -37,7 +36,7 @@ class AppController(QObject):
         # 親クラスのQObjectのご加護を得る
         super().__init__(parent)
 
-        self.project_datum = ProjectDataEntity()#XXX:いつかはDataManagerに任せる。
+        self.project_datum = ProjectDataEntity()  # XXX:いつかはDataManagerに任せる。
 
         self._data_mangeger = DataManager(
             self, equipment_list=equipment_list, equipment_ports=equipment_ports
@@ -62,7 +61,9 @@ class AppController(QObject):
         self.main_window = (
             MainWindow()
         )  # selfをつけ生存期間をAppCOntorollerと同等に延長
-        self.main_window.set_window_title(self.project_datum.file_name)#XXX:ここに書くの良くないね。
+        self.main_window.set_window_title(
+            self.project_datum.file_name
+        )  # XXX:ここに書くの良くないね。
 
         self.set_menubar()
 

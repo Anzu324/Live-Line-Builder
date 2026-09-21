@@ -4,6 +4,7 @@ from live_line_builder.ui.models import EquipmentModel, EquipmentPortModel
 from live_line_builder.ui.models.proxies import (
     MultiFilterProxyModel,  # プロキシモデルをインポート
 )
+from live_line_builder.ui.views.ground_plan import GroundPlanView
 from live_line_builder.ui.views.live_info_view import LiveInfoView
 from live_line_builder.ui.views.table import (
     EquipmentTableView,  # テーブルビューをインポート
@@ -29,6 +30,8 @@ class PlanSheetView(QWidget):
         # ライブ情報エリア
         self.form = LiveInfoView()
         self.v_layout.addWidget(self.form)
+        self.grand_plan = GroundPlanView()
+        self.v_layout.addWidget(self.grand_plan)
 
         # 回線エリア
         self.multi_column_layout = QVBoxLayout()  # マルチの列のレイアウトを作成
