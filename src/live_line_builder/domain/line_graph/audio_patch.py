@@ -50,6 +50,24 @@ class EquipmentInstance:
     type: NodeType
 
 
+class WrongPortConnectionError(ValueError):
+    def __str__(self):
+        return "例外クラス：MyException"
+
+
+@dataclass
+class EquipmentDTO:
+    """アダプターからメインシステムに追加するオブジェクト情報を伝播するためにオブジェクトです。
+
+    IDはUUIDの生成機を用いてください。
+    """
+
+    equipment: EquipmentInstance
+    port: dict[PortID, PortInstance]
+    forward_edges: dict[PortID, set[PortID]]
+    backward_edges: dict[PortID, PortID]
+
+
 # ==========================================
 # 2. コアシステム (Logic)
 # ==========================================
@@ -72,16 +90,42 @@ class AudioPatchSystem:
     def _get_equipment_id(self, port_id) -> EquipmentInstance:
         return self.equipments[self.ports[port_id].equipment_id]
 
-    # --- 登録・基本操作 ---
-
-    def add_equipment(self, eq: EquipmentInstance) -> None:
+    def _add_equipment(self, eq: EquipmentInstance) -> None:
+        """
+        この関数はEquipmentInstanceを追加するもの。内部で呼ばれる事を想定する。
+        定義から機材とポートの両方を登録するためには別の関数を使用する。
+        """
         self.equipments[eq.id] = eq
 
-    def add_port(self, port: PortInstance) -> None:
+    def _add_port(self, port: PortInstance) -> None:
+        """
+        この関数はPortInstanceを追加するためのもの。内部で呼ばれる事を想定する。
+        """
         self.ports[port.id] = port
         if port.direction == PortDirection.OUT:
             # 出力側なら受け手のリストを作成
             self.forward_edges[port.id] = set()
+
+    # --- 登録・基本操作 ---
+
+    def add_equipment(self, eq: EquipmentDTO) -> None:
+        """AudioPatchシステムに機材とポートその内部配線を追加する。
+
+        Args:
+            eq (EquipmentDTO): DefinitionからAdopterを用いて生成したデータ。
+        """
+
+        # この関数が行うこと
+        # 1.Equipmentを登録
+        # 2.Portを登録
+        # 3.内部配線を登録
+
+        if (self.ports.keys() & eq.port.keys()) is None:
+            raise ValueError("IDの重複が検知されました。再度追加を試みてください。")
+        self._add_equipment(eq.equipment)
+        self.ports |= eq.port
+        self.forward_edges |= eq.forward_edges
+        self.backward_edges |= eq.backward_edges
 
     def connect_ports(self, port_a_id: PortID, port_b_id: PortID) -> None:
         """物理的な結線（方向は自動でOUT->INに正規化）"""
@@ -89,7 +133,9 @@ class AudioPatchSystem:
         p_b = self.ports[port_b_id]
 
         if p_a.direction == p_b.direction:
-            raise ValueError(f"同属性（{p_a.direction.value}同士）は接続できません。")
+            raise WrongPortConnectionError(
+                f"同属性（{p_a.direction.value}同士）は接続できません。"
+            )
 
         out_port = p_a if p_a.direction == PortDirection.OUT else p_b
         in_port = p_b if p_a.direction == PortDirection.OUT else p_a
@@ -189,7 +235,7 @@ class AudioPatchSystem:
         )
 
         if not sb_out_port:
-            raise ValueError(
+            raise WrongPortConnectionError(
                 f"指定されたStageBox(Ch.{ch_no})の出力ポートが見つかりません。"
             )
 
@@ -212,7 +258,7 @@ class AudioPatchSystem:
             if p.equipment_id == instrument_eq_id and p.direction == PortDirection.OUT
         ]
         if not out_ports:
-            raise ValueError("指定された楽器に出力ポートが存在しません。")
+            raise WrongPortConnectionError("指定された楽器に出力ポートが存在しません。")
 
         # 下流を探索してマルチのOUTを探す
         sb_out_port = None

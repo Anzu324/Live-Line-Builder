@@ -98,7 +98,7 @@ class ProjectRepository:
                         name=eq_schema.name,
                         type=node_type,
                     )
-                    pg._audiopath.add_equipment(eq)
+                    pg._audiopath._add_equipment(eq)
 
                     for port_schema in eq_schema.ports:
                         direction = (
@@ -118,7 +118,7 @@ class ProjectRepository:
                             gender=gender,
                             equipment_id=eq.id,
                         )
-                        pg._audiopath.add_port(audio_port)
+                        pg._audiopath._add_port(audio_port)
 
                 # 結線 (connections) の復元
                 for conn in audio_schema.connections:
