@@ -19,3 +19,6 @@ class PerformanceGroup:
         __init__が変更されても常に引数無しで初期値が生成することを保証する。
         """
         return PerformanceGroup()
+
+    def __repr__(self) -> str:
+        return f"PerformanceGroup({self._performance_info!r}, {self._audiopath!r})"
