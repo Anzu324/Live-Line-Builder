@@ -20,8 +20,7 @@ from live_line_builder.ui.views import AudioPatchTableView, MainWindow, PlanShee
 
 # ★ QObject を継承する
 class AppController(QObject):
-    """
-    main_windowに代わってモデルの配線を担当。
+    """main_windowに代わってModel,View,Controllerを生成し組み立て、配線するまでを担当。
     """
 
     # ★ カスタムシグナルの定義（QObject の直下に書く）
