@@ -2,7 +2,6 @@ from pathlib import Path
 
 from PySide6.QtCore import QObject, Signal
 
-from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import (
     EquipmentDefinition,
     EquipmentPortDefinition,
@@ -50,8 +49,11 @@ class DataManager(QObject):
     # モックでデータマネージャーを構築する
     @staticmethod
     def factory_by_mock() -> DataManager:
-        print("AppControllerのfactoryを呼んでいる。早めに移行せよ")
-        return DataManager(None, mock_data.equipment_data, mock_data.port_data)
+        print("DataManaferのMockのfactoryを呼んでいる。")
+        dm = DataManager()
+        dm.load_mock_project()
+        return dm
+        #return DataManager(None, mock_data.equipment_data, mock_data.port_data)
 
     @property
     def equipment_entity(self) -> EquipmentDefinition:
@@ -71,3 +73,17 @@ class DataManager(QObject):
         self._performance_group_list = performance_groups
 
         self.call_reload_all_ui.emit()
+
+    def load_mock_project(self, mock_file_name: str = "full_mock_data.json"):
+        repository = ProjectRepository()
+        equipment_entity, equipment_port_entity, performance_groups = repository.load_mock(
+            mock_file_name
+        )
+        self._equipment_entity = equipment_entity
+        self._equipment_port_entity = equipment_port_entity
+        self._performance_group_list = performance_groups
+
+        self.call_reload_all_ui.emit()
+
+    def __repr__(self) -> str:
+        return f"DataManager(equipment_entity={self._equipment_entity}, equipment_port_entity={self._equipment_port_entity}, performance_group_list={self._performance_group_list})"

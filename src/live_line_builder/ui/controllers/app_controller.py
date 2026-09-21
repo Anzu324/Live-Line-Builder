@@ -44,10 +44,9 @@ class AppController(QObject):
             self, equipment_list=equipment_list, equipment_ports=equipment_ports
         )
 
-        # XXX:仮で無理矢理作ってます。
-        self._data_mangeger._performance_group_list = [
-            PerformanceGroup.make_default() for _ in range(4)
-        ]
+        # HACK: モックをここで読み込んで使用しております。
+        self._data_mangeger.load_mock_project()
+
         self.performance_data = [
             PerformanceModel(self, i._performance_info)
             for i in self._data_mangeger._performance_group_list
