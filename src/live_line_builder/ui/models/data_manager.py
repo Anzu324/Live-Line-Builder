@@ -17,8 +17,10 @@ from live_line_builder.storages.repository import ProjectRepository
 
 # TODO:公演ごとにもろもろを切り替える処理
 class DataManager(QObject):
-    """
-    ModelやUIから呼び出され複数のエンティティ(ピュアなデータ)間の橋渡しを担う。
+    """ModelやUIから呼び出され複数のエンティティ(ピュアなデータ)間の橋渡しを担う。
+
+    実質的にはModelの一種であるがUIとしては最下層の窓口としてふるまっており、その他のModelを作ることもできる。
+    EntityやStorageなどUIより下層のレイヤーの連結も担っている。
     """
 
     call_reload_all_ui = Signal()
