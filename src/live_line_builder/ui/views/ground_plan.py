@@ -9,7 +9,7 @@ class GroundPlanView(QWidget):
 
         # 1. 画像を表示するためのQLabel
         self.image_label = QLabel(self)
-        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter) # 中央揃えに設定
+        self.image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # 中央揃えに設定
 
         # 💡 初期状態（画像がない時）のテキストを設定
         # 改行を入れて、左下のボタンの位置を避ける案内文にします
@@ -18,7 +18,9 @@ class GroundPlanView(QWidget):
             "左下の「＋」ボタンから画像を追加してください。"
         )
         # スタイルシートで文字を薄いグレーにして「未登録感」を出す
-        self.image_label.setStyleSheet("color: #757575; font-size: 14px; font-weight: bold;")
+        self.image_label.setStyleSheet(
+            "color: #757575; font-size: 14px; font-weight: bold;"
+        )
 
         # ボタンの配置用マージンとサイズ
         self.button_margin = 15

@@ -52,7 +52,9 @@ class ComboBoxTabsView(QWidget):
         scroll_area.setWidgetResizable(True)
 
         # スクロールエリア自体が周囲のレイアウトで潰されないように設定
-        scroll_area.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        scroll_area.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
 
         # 💡 【アップデート】
         # ウィジェットが親に配置され、レイアウトが完全に確定した段階で
@@ -76,7 +78,6 @@ class ComboBoxTabsView(QWidget):
         # 例：if hasattr(widget, "size_changed_signal"): widget.size_changed_signal.connect(adjust_widget_size)
 
         self.stacked_widget.addWidget(scroll_area)
-
 
     def update_tab_title(self, index: int, new_title: str):
         """後から特定タブの表示名を変更したい場合に使用"""
