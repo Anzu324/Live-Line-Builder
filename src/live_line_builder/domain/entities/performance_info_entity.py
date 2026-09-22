@@ -31,3 +31,6 @@ class PerformanceInfoEntity:
     def __init__(self) -> None:
         self.setlist: SetListEntity = SetListEntity()
         self.table_panels: list[list[TableViewSelector]] = []
+
+    def __repr__(self) -> str:
+        return f"PerformanceInfoEntity(tab_name={self.tab_name!r}, name={self.name!r}, place={self.place!r}, day={self.day!r}, live_director={self.live_director!r}, sound_director={self.sound_director!r}, sound_crews={self.sound_crews!r})"

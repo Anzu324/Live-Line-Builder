@@ -45,3 +45,7 @@ class MainWindow(QMainWindow):
 
             scroll_area.setWidget(i)
             self.tabs.addTab(scroll_area, j)
+
+    def set_window_title(self, projectname: str):
+        title = f"LIVE LINE BUILDER - {projectname}"
+        self.setWindowTitle(title)

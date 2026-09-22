@@ -45,9 +45,9 @@ RowT = TypeVar("RowT", bound=TableRowModel)
 
 class TableEntity[RowT: TableRowModel]:
     """Table型のエンティティを保持する。継承により具体化して使う。
-    
+
     継承時は__init__無くとも簡易的に切り替えできる。
-    
+
     Attributes:
     columns (list[Column]): テーブル型のエンティティの列の属性を指定。
     row_type (TableRowModel): 各行のデータ構造を指定。
@@ -159,6 +159,9 @@ class TableEntity[RowT: TableRowModel]:
 
     def __len__(self) -> int:
         return len(self.rows)
+
+    def __repr__(self) -> str:
+        return f"TableEntity(ClassName={self.__class__.__name__}, Column❇={self.columns}, rows={len(self.rows)}\n)"
 
 
 def zip_column_key_and_table(

@@ -2,6 +2,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
     QScrollArea,
+    QSizePolicy,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -49,8 +50,32 @@ class ComboBoxTabsView(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         scroll_area.setWidgetResizable(True)
-        widget.setMinimumSize(250, 200)
+
+        # スクロールエリア自体が周囲のレイアウトで潰されないように設定
+        scroll_area.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+
+        # 💡 【アップデート】
+        # ウィジェットが親に配置され、レイアウトが完全に確定した段階で
+        # 正しいサイズを計算させて最小サイズをロックする関数を作ります。
+        def adjust_widget_size():
+            # レイアウトが設定されている（Noneではない）場合のみ activate() を呼ぶ
+            current_layout = widget.layout()
+            if current_layout is not None:
+                current_layout.activate()
+
+            # 確定した理想サイズを最小サイズに適用
+            widget.setMinimumSize(widget.sizeHint())
+
+        # まず現在のサイズでセット
+        adjust_widget_size()
         scroll_area.setWidget(widget)
+
+        # 💡 将来的に GroundPlanView 側で画像が読み込まれて「サイズが変わったよ！」
+        # という通知（カスタムシグナルなど）を受け取れるように、
+        # 必要に応じてここにサイズ再計算のアタッチをしておくと便利です。
+        # 例：if hasattr(widget, "size_changed_signal"): widget.size_changed_signal.connect(adjust_widget_size)
 
         self.stacked_widget.addWidget(scroll_area)
 

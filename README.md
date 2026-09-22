@@ -10,9 +10,14 @@ GitHub初心者。PythonでGUIアプリ作成が初。であるので、私か�
 [パッケージの分類方針](https://github.com/Anzu324/Live-Line-Builder/blob/main/docs/design-strategy/role-of-packages.md)
 
 ## 使っているライブラリ等
-
-- UV (Pythonのバージョンやライブラリをプロジェクト単位で管理する)
+### アプリ用
 - Pyside6 (UIを作成する)
 - Pydantic(バリデーションとシリアライズ)
+
+### 開発用
+- uv (Pythonのバージョンやライブラリをプロジェクト単位で管理する)
+- Ruff(コードフォーマットとリンティング)
+- mypy(型チェック)
+- pytest(テストの実行)
 
 詳しくは[pyproject.toml](https://github.com/Anzu324/Live-Line-Builder/blob/main/pyproject.toml)を参照しよう。

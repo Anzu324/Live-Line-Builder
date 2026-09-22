@@ -3,7 +3,7 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget
 
 from live_line_builder.app_mock import mock_data
-from live_line_builder.domain.entities import PerformanceGroup, ProjectDataEntity
+from live_line_builder.domain.entities import ProjectDataEntity
 from live_line_builder.ui.controllers import (
     PerformanceTabController,
     PlanSheetController,
@@ -20,9 +20,7 @@ from live_line_builder.ui.views import AudioPatchTableView, MainWindow, PlanShee
 
 # ★ QObject を継承する
 class AppController(QObject):
-    """
-    main_windowに代わってモデルの配線を担当。
-    """
+    """main_windowに代わってModel,View,Controllerを生成し組み立て、配線するまでを担当。"""
 
     # ★ カスタムシグナルの定義（QObject の直下に書く）
     data_changed = Signal()  # 引数なしの通知
@@ -38,16 +36,15 @@ class AppController(QObject):
         # 親クラスのQObjectのご加護を得る
         super().__init__(parent)
 
-        self.project_datum = ProjectDataEntity()
+        self.project_datum = ProjectDataEntity()  # XXX:いつかはDataManagerに任せる。
 
         self._data_mangeger = DataManager(
             self, equipment_list=equipment_list, equipment_ports=equipment_ports
         )
 
-        # XXX:仮で無理矢理作ってます。
-        self._data_mangeger._performance_group_list = [
-            PerformanceGroup.make_default() for _ in range(4)
-        ]
+        # HACK: モックをここで読み込んで使用しております。
+        self._data_mangeger.load_mock_project()
+
         self.performance_data = [
             PerformanceModel(self, i._performance_info)
             for i in self._data_mangeger._performance_group_list
@@ -64,6 +61,9 @@ class AppController(QObject):
         self.main_window = (
             MainWindow()
         )  # selfをつけ生存期間をAppCOntorollerと同等に延長
+        self.main_window.set_window_title(
+            self.project_datum.file_name
+        )  # XXX:ここに書くの良くないね。
 
         self.set_menubar()
 
@@ -131,7 +131,7 @@ class AppController(QObject):
         # --- 1. 階層構造（サブメニュー）の作成 ---
         file_menu = menu_bar.addMenu("ファイル(&F)")
 
-        new_project = file_menu.addMenu("新規空オブジェクト(&N)")
+        file_menu.addAction(QAction("新規空オブジェクト(&N)", self))
 
         # QMenuオブジェクトに対して addMenu() を呼ぶことでネスト可能
         export_menu = file_menu.addMenu("エクスポート(&E)")

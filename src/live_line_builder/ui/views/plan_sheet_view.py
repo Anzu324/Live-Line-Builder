@@ -4,6 +4,7 @@ from live_line_builder.ui.models import EquipmentModel, EquipmentPortModel
 from live_line_builder.ui.models.proxies import (
     MultiFilterProxyModel,  # プロキシモデルをインポート
 )
+from live_line_builder.ui.views.ground_plan import GroundPlanView
 from live_line_builder.ui.views.live_info_view import LiveInfoView
 from live_line_builder.ui.views.table import (
     EquipmentTableView,  # テーブルビューをインポート
@@ -29,6 +30,8 @@ class PlanSheetView(QWidget):
         # ライブ情報エリア
         self.form = LiveInfoView()
         self.v_layout.addWidget(self.form)
+        self.grand_plan = GroundPlanView()
+        self.v_layout.addWidget(self.grand_plan)
 
         # 回線エリア
         self.multi_column_layout = QVBoxLayout()  # マルチの列のレイアウトを作成
@@ -75,3 +78,17 @@ class PlanSheetView(QWidget):
         self.v_layout.addLayout(self.h_layout)  # 垂直レイアウトに水平レイアウトを追加
         self.v_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.v_layout)
+
+    def replace_form(self, new_widget: QWidget):
+        # すでに差し替え済み（None）なら何もしない
+        if not self.form:
+            return
+
+        # 2. 変数を使って差し替える（自動的に一番上の位置で入れ替わります）
+        self.v_layout.replaceWidget(self.form, new_widget)
+
+        # 3. 古いウィジェットを画面から完全に消す
+        self.form.deleteLater()
+
+        # 4. (任意) 次回のために、新しいウィジェットを変数に上書きしておく
+        self.form = new_widget

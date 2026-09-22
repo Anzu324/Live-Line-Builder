@@ -16,7 +16,6 @@ class EquipmentDefinition:
     ports: list[PortDefinition]
     internal_links: list[InternalLink]
     max_quantity: Optional[int] = None  # 持ち込み/確保上限数
-
 ```
 
 ### 機材インスタンス (EquipmentInstance)
@@ -28,22 +27,21 @@ class EquipmentInstance:
     definition_id: str
     label: str  # 例: "A.Gtr DI", "Stagebox Prompt L"
     port_states: dict[str, PortState]
-
 ```
 
 ### 内部リンク (InternalLink)
 
 ```python
 class InternalLinkType(str, Enum):
-    PASSTHROUGH = "passthrough"      # スルーアウト・パラレル（DI Thru等）
+    PASSTHROUGH = "passthrough"  # スルーアウト・パラレル（DI Thru等）
     INTERNAL_ROUTE = "internal_route"  # ミキサー内部ルーティング等
+
 
 @dataclass
 class InternalLink:
     from_port_id: str
     to_port_id: str
     link_type: InternalLinkType
-
 ```
 
 ## 3. 数量監視ロジック (Quantity Monitoring)

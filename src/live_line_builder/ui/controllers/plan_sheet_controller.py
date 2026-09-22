@@ -10,4 +10,8 @@ class PlanSheetController:
 
         live_info_view = LiveInfoView()
         self._live_info_cntl = LiveInfoController(live_info_view, live_info_model)
-        self._view.form = live_info_view
+        self._view.replace_form(live_info_view)
+
+    @property
+    def view(self) -> PlanSheetView:
+        return self._view
