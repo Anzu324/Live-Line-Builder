@@ -1,11 +1,11 @@
 from collections import defaultdict
-from pathlib import Path
 from typing import Any
 
 from live_line_builder.domain.entities import (
     EquipmentDefinition,
     EquipmentPortDefinition,
     PerformanceGroup,
+    ProjectDataCargo,
 )
 from live_line_builder.domain.line_graph.audio_patch import (
     EquipmentID,
@@ -34,19 +34,8 @@ class ProjectSerializer:
 
     Entity ➔ Schema(Pydantic) ➔ JSON
     """
-    def load_mock(
-        self, mock_file_name: str = "full_mock_data.json"
-    ) -> tuple[EquipmentDefinition, EquipmentPortDefinition, list[PerformanceGroup]]:
-        """
-        AppMockディレクトリ内のモックJSONを読み込む仮コード(開発・テスト用ヘルパー)
-        """
-        mock_path = Path(__file__).resolve().parent.parent / "app_mock" / mock_file_name
-        json_str = mock_path.read_text(encoding="utf-8")
-        return self.load(json_str)
 
-    def load(
-        self,json_str:str
-    ) -> tuple[EquipmentDefinition, EquipmentPortDefinition, list[PerformanceGroup]]:
+    def load(self, json_str: str) -> ProjectDataCargo:
         """JSON(ネスト) ➔ Entity(フラット)"""
         schema = ProjectDataSchema.model_validate_json(json_str)
 
@@ -136,18 +125,18 @@ class ProjectSerializer:
 
             performance_groups.append(pg)
 
-        return (
+        return ProjectDataCargo(
             EquipmentDefinition(rows=equip_rows),
             EquipmentPortDefinition(rows=port_rows),
             performance_groups,
         )
 
-    def save(
+    def dump(
         self,
         equip_table: EquipmentDefinition,
         port_table: EquipmentPortDefinition,
         performance_groups: list[PerformanceGroup],
-    )->str:
+    ) -> str:
         """Entity(フラット) ➔ JSON(ネスト)"""
         # 1. Portデータを equip_id ごとにグループ化しておく
         ports_by_equip = defaultdict(list)

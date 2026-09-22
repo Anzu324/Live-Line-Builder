@@ -1,18 +1,16 @@
-from pathlib import Path
-
 from PySide6.QtCore import QObject, Signal
 
 from live_line_builder.domain.entities import (
     EquipmentDefinition,
     EquipmentPortDefinition,
     PerformanceGroup,
+    ProjectDataCargo,
 )
 from live_line_builder.domain.entities.columns import (
     EQUIPMENT_COLUMNS,
     EQUIPMENT_PORT_COLUMNS,
 )
 from live_line_builder.domain.entities.table_entity import zip_column_key_and_table
-from live_line_builder.storages.serializer import ProjectSerializer
 
 
 # TODO:公演ごとにもろもろを切り替える処理
@@ -48,15 +46,6 @@ class DataManager(QObject):
                 zip_column_key_and_table(temp, equipment_ports)
             )
 
-    # モックでデータマネージャーを構築する
-    @staticmethod
-    def factory_by_mock() -> DataManager:
-        print("DataManaferのMockのfactoryを呼んでいる。")
-        dm = DataManager()
-        dm.load_mock_project()
-        return dm
-        # return DataManager(None, mock_data.equipment_data, mock_data.port_data)
-
     @property
     def equipment_entity(self) -> EquipmentDefinition:
         return self._equipment_entity
@@ -65,26 +54,11 @@ class DataManager(QObject):
     def equipment_port_entity(self) -> EquipmentPortDefinition:
         return self._equipment_port_entity
 
-    #XXX:REPOSITORY経由に直すこと
-    def load_projetct_from_save_data(self, file_path: Path):
-        repository = ProjectSerializer()
-        equipment_entity, equipment_port_entity, performance_groups = repository.load(
-            file_path.read_text(encoding="utf-8")
-        )
-        self._equipment_entity = equipment_entity
-        self._equipment_port_entity = equipment_port_entity
-        self._performance_group_list = performance_groups
-
-        self.call_reload_all_ui.emit()
-
-    def load_mock_project(self, mock_file_name: str = "full_mock_data.json"):
-        repository = ProjectSerializer()
-        equipment_entity, equipment_port_entity, performance_groups = (
-            repository.load_mock(mock_file_name)
-        )
-        self._equipment_entity = equipment_entity
-        self._equipment_port_entity = equipment_port_entity
-        self._performance_group_list = performance_groups
+    # XXX:REPOSITORY経由に直すこと
+    def load_by_cargo(self, project_data: ProjectDataCargo):
+        self._equipment_entity = project_data.equipment_entity
+        self._equipment_port_entity = project_data.equipment_port_entity
+        self._performance_group_list = project_data.performance_group_list
 
         self.call_reload_all_ui.emit()
 

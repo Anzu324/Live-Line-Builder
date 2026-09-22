@@ -1,3 +1,9 @@
+from dataclasses import dataclass
+
+from live_line_builder.domain.entities.entity import (
+    EquipmentDefinition,
+    EquipmentPortDefinition,
+)
 from live_line_builder.domain.entities.performance_info_entity import (
     PerformanceInfoEntity,
 )
@@ -22,3 +28,10 @@ class PerformanceGroup:
 
     def __repr__(self) -> str:
         return f"PerformanceGroup({self._performance_info!r}, {self._audiopatch!r})"
+
+
+@dataclass
+class ProjectDataCargo:
+    equipment_entity: EquipmentDefinition
+    equipment_port_entity: EquipmentPortDefinition
+    performance_group_list: list[PerformanceGroup]

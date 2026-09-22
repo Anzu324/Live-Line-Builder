@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QWidget
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import ProjectDataEntity
 from live_line_builder.domain.line_graph.audio_patch import print_all_connections
+from live_line_builder.storages import ProjectRepository
 from live_line_builder.ui.controllers import (
     PerformanceTabController,
     PlanSheetController,
@@ -44,7 +45,7 @@ class AppController(QObject):
         )
 
         # HACK: モックをここで読み込んで使用しております。
-        self._data_mangeger.load_mock_project()
+        self.load_mock_project()
 
         self.performance_data = [
             PerformanceModel(self, i._performance_info)
@@ -100,6 +101,11 @@ class AppController(QObject):
             self.main_window.tabs,
             PerformanceGroupModel(group=self._data_mangeger._performance_group_list),
         ).set_tabs(list(zip(tab_names, self.worksheet_widgets, self.patch_views)))
+
+    def load_mock_project(self, mock_file_name: str = "full_mock_data.json"):
+        repository = ProjectRepository()
+        cargo = repository.load_mock(mock_file_name)
+        self._data_mangeger.load_by_cargo(cargo)
 
     # モックでデータマネージャーを構築する
     @staticmethod
