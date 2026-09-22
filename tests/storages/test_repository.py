@@ -8,12 +8,12 @@ from live_line_builder.domain.entities import (
     PerformanceGroup,
 )
 from live_line_builder.domain.line_graph.audio_patch import NodeType
-from live_line_builder.storages.repository import ProjectRepository
+from live_line_builder.storages.serializer import ProjectSerializer
 
 
 @pytest.fixture
 def repository():
-    return ProjectRepository()
+    return ProjectSerializer()
 
 
 def test_load_mock_data_structure(repository):

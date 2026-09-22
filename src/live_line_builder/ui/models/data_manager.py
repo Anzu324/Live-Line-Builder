@@ -12,7 +12,7 @@ from live_line_builder.domain.entities.columns import (
     EQUIPMENT_PORT_COLUMNS,
 )
 from live_line_builder.domain.entities.table_entity import zip_column_key_and_table
-from live_line_builder.storages.repository import ProjectRepository
+from live_line_builder.storages.serializer import ProjectSerializer
 
 
 # TODO:公演ごとにもろもろを切り替える処理
@@ -65,10 +65,11 @@ class DataManager(QObject):
     def equipment_port_entity(self) -> EquipmentPortDefinition:
         return self._equipment_port_entity
 
+    #XXX:REPOSITORY経由に直すこと
     def load_projetct_from_save_data(self, file_path: Path):
-        repository = ProjectRepository()
+        repository = ProjectSerializer()
         equipment_entity, equipment_port_entity, performance_groups = repository.load(
-            file_path
+            file_path.read_text(encoding="utf-8")
         )
         self._equipment_entity = equipment_entity
         self._equipment_port_entity = equipment_port_entity
@@ -77,7 +78,7 @@ class DataManager(QObject):
         self.call_reload_all_ui.emit()
 
     def load_mock_project(self, mock_file_name: str = "full_mock_data.json"):
-        repository = ProjectRepository()
+        repository = ProjectSerializer()
         equipment_entity, equipment_port_entity, performance_groups = (
             repository.load_mock(mock_file_name)
         )
