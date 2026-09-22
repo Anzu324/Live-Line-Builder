@@ -3,6 +3,7 @@ from __future__ import annotations
 from live_line_builder.domain.entities import (
     EquipmentDefinition,
     EquipmentPortDefinition,
+    EquipmentPortRow,
     EquipmentRow,
 )
 
@@ -80,7 +81,24 @@ def build_equipment_instance(
         equipment_definition.name,
         NodeType(equipment_definition.equip_type),
     )
-    return EquipmentDTO(eq_instance, dict(), dict(), dict())
+    fileterd_ports: list[EquipmentPortRow] = [
+        ports[i]
+        for i in range(ports.column_size())
+        if ports.get_item(i, "equip_id")
+        == equipment_definition.name  # 対象機材のコネクタのみを絞って検索
+    ]
+    ports_instances = {
+        PortID(i.port_id): PortInstance(
+            id=PortID(i.port_id),
+            name=i.name,
+            direction=PortDirection.IN,
+            gender=PortGender.MALE,
+            equipment_id=EquipmentID(i.equip_id),
+            channel_no=None,
+        )
+        for i in fileterd_ports
+    }
+    return EquipmentDTO(eq_instance, ports_instances, dict(), dict())
 
 
 def register_equipment_definition(
