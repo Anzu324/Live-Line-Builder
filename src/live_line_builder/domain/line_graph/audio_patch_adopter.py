@@ -3,10 +3,12 @@ from __future__ import annotations
 from live_line_builder.domain.entities import (
     EquipmentDefinition,
     EquipmentPortDefinition,
+    EquipmentRow,
 )
 
 from .audio_patch import (
     AudioPatchSystem,
+    EquipmentDTO,
     EquipmentID,
     EquipmentInstance,
     NodeType,
@@ -64,6 +66,20 @@ def _coerce_port_channel_no(value: str | int | None) -> int | None:
         return int(value)
     except TypeError, ValueError:
         return None
+
+
+def build_equipment_instance(
+    equipment_definition: EquipmentRow,
+    ports: EquipmentDefinition,
+    inner_links_upstream: dict,
+    inner_links_downstream: dict,
+) -> EquipmentDTO:
+    eq_instance = EquipmentInstance(
+        EquipmentID(equipment_definition.equip_id),
+        equipment_definition.name,
+        NodeType(equipment_definition.equip_type),
+    )
+    return EquipmentDTO(eq_instance, dict(), dict(), dict())
 
 
 def register_equipment_definition(
