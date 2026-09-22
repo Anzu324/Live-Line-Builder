@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QFrame, QMainWindow, QScrollArea, QVBoxLayout
+from PySide6.QtWidgets import QFrame, QMainWindow, QScrollArea
 
 from live_line_builder.ui.views.plan_sheet_view import (
     PlanSheetView,  # メインコンテンツビューをインポート
@@ -19,12 +19,9 @@ class MainWindow(QMainWindow):
         # ウィンドウタイトルを指定
         self.setWindowTitle("LIVE LINE BUILDER")
 
-        self.v_layout = QVBoxLayout(self)  # 垂直方向のレイアウトを作成
-
         self.tabs = WorkSheetTabWidget(self)
         self.tabs.setContentsMargins(0, 0, 0, 0)
 
-        self.v_layout.addWidget(self.tabs)  # レイアウトにメインコンテンツビューを追加
         self.setCentralWidget(self.tabs)
 
     def set_central_widget(self, widget: PlanSheetView):

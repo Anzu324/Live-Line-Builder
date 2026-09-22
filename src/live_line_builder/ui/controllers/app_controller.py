@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QWidget
 
 from live_line_builder.app_mock import mock_data
 from live_line_builder.domain.entities import ProjectDataEntity
+from live_line_builder.domain.line_graph.audio_patch import print_all_connections
 from live_line_builder.ui.controllers import (
     PerformanceTabController,
     PlanSheetController,
@@ -49,6 +50,11 @@ class AppController(QObject):
             PerformanceModel(self, i._performance_info)
             for i in self._data_mangeger._performance_group_list
         ]
+
+        # DEBAG:コンソールに読み込んだパッチの接続状況を書き出すコード。
+        print("Talk by AppController")
+        for i in self._data_mangeger._performance_group_list:
+            print_all_connections(i._audiopatch)
 
         # 文字列で機器表を初期化する
         self._equipments = EquipmentModel(self._data_mangeger.equipment_entity)

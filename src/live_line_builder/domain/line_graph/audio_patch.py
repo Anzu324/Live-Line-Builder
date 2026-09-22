@@ -400,7 +400,7 @@ def print_visual_patch_flow(sys: AudioPatchSystem):
 
 def print_all_connections(sys: AudioPatchSystem):
     """【表示機能 2】全てのパッチ（結線）リストを列挙表示する"""
-    print("\n=== 現在のパッチリスト ===")
+    print("=== 現在のパッチリスト ===")
     for out_id, in_ids in sys.forward_edges.items():
         out_p = sys.ports[out_id]
         out_eq = sys.equipments[out_p.equipment_id]

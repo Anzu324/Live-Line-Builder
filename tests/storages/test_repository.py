@@ -71,7 +71,7 @@ def test_performance_group_loaded(repository):
     assert info1.sound_crews == "鈴木, 田中"
 
     # Day 1 のパッチシステム機器
-    patch_sys1 = day1._audiopath
+    patch_sys1 = day1._audiopatch
     assert len(patch_sys1.equipments) == 4
     assert "patch_eq_vo1" in patch_sys1.equipments
     assert patch_sys1.equipments["patch_eq_vo1"].type == NodeType.MIC
@@ -93,7 +93,7 @@ def test_performance_group_loaded(repository):
     info2 = day2._performance_info
     assert info2.tab_name == "Day 2"
     assert info2.name == "Summer Music Fest 2026 Day2"
-    assert len(day2._audiopath.equipments) == 2
+    assert len(day2._audiopatch.equipments) == 2
 
 
 def test_save_and_reload(repository, tmp_path: Path):

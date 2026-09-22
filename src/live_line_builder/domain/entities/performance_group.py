@@ -11,7 +11,7 @@ class PerformanceGroup:
 
     def __init__(self) -> None:
         self._performance_info: PerformanceInfoEntity = PerformanceInfoEntity()
-        self._audiopath: AudioPatchSystem = AudioPatchSystem()
+        self._audiopatch: AudioPatchSystem = AudioPatchSystem()
 
     @staticmethod
     def make_default() -> PerformanceGroup:
@@ -21,4 +21,4 @@ class PerformanceGroup:
         return PerformanceGroup()
 
     def __repr__(self) -> str:
-        return f"PerformanceGroup({self._performance_info!r}, {self._audiopath!r})"
+        return f"PerformanceGroup({self._performance_info!r}, {self._audiopatch!r})"

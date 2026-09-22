@@ -25,7 +25,7 @@ class PlanSheetView(QWidget):
     ):
         super().__init__(parent)
         self.v_layout = QVBoxLayout(self)
-        self.h_layout = QHBoxLayout(self)  # 垂直方向のレイアウトを作成
+        self.h_layout = QHBoxLayout()  # 垂直方向のレイアウトを作成
 
         # ライブ情報エリア
         self.form = LiveInfoView()
@@ -43,9 +43,6 @@ class PlanSheetView(QWidget):
             proxy_model = MultiFilterProxyModel()
             proxy_model.setSourceModel(connector_model)  # 元のModelをセット
             if i := equipment_model.get_product_at(x):
-                print(
-                    f"Creating table for equipment ID: {x}:{i['name']}"
-                )  # デバッグ用の出力
                 proxy_model.set_filter_condition(
                     0, str(i["equip_id"])
                 )  # フィルター対象の列と値を指定

@@ -98,7 +98,7 @@ class ProjectRepository:
                         name=eq_schema.name,
                         type=node_type,
                     )
-                    pg._audiopath._add_equipment(eq)
+                    pg._audiopatch._add_equipment(eq)
 
                     for port_schema in eq_schema.ports:
                         direction = (
@@ -118,14 +118,17 @@ class ProjectRepository:
                             gender=gender,
                             equipment_id=eq.id,
                         )
-                        pg._audiopath._add_port(audio_port)
+                        pg._audiopatch._add_port(audio_port)
 
                 # 結線 (connections) の復元
                 for conn in audio_schema.connections:
                     from_id = PortID(conn.from_port_id)
                     to_id = PortID(conn.to_port_id)
-                    if from_id in pg._audiopath.ports and to_id in pg._audiopath.ports:
-                        pg._audiopath.connect_ports(from_id, to_id)
+                    if (
+                        from_id in pg._audiopatch.ports
+                        and to_id in pg._audiopatch.ports
+                    ):
+                        pg._audiopatch.connect_ports(from_id, to_id)
 
             performance_groups.append(pg)
 
@@ -187,7 +190,7 @@ class ProjectRepository:
 
             # AudioPatchSystemSchema
             patch_ports_by_eq = defaultdict(list)
-            for port in performance_group._audiopath.ports.values():
+            for port in performance_group._audiopatch.ports.values():
                 patch_ports_by_eq[port.equipment_id].append(
                     PatchPortSchema(
                         port_id=str(port.id),
@@ -198,7 +201,7 @@ class ProjectRepository:
                 )
 
             patch_equipments = []
-            for equip in performance_group._audiopath.equipments.values():
+            for equip in performance_group._audiopatch.equipments.values():
                 patch_equipments.append(
                     PatchEquipmentSchema(
                         equip_id=str(equip.id),
@@ -212,7 +215,7 @@ class ProjectRepository:
             for (
                 out_port_id,
                 in_port_ids,
-            ) in performance_group._audiopath.forward_edges.items():
+            ) in performance_group._audiopatch.forward_edges.items():
                 for in_port_id in in_port_ids:
                     patch_connections.append(
                         PatchConnectionSchema(
