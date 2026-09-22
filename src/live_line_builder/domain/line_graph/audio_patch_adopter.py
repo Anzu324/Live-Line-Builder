@@ -68,6 +68,7 @@ def _coerce_port_channel_no(value: str | int | None) -> int | None:
         return None
 
 
+# XXX:実装途中エラーのみ解消。
 def build_equipment_instance(
     equipment_definition: EquipmentRow,
     ports: EquipmentDefinition,
