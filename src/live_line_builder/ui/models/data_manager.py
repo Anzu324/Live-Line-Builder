@@ -54,13 +54,21 @@ class DataManager(QObject):
     def equipment_port_entity(self) -> EquipmentPortDefinition:
         return self._equipment_port_entity
 
-    # XXX:REPOSITORY経由に直すこと
     def load_by_cargo(self, project_data: ProjectDataCargo):
+        """ProjectDataCargoからEntityをロードする"""
         self._equipment_entity = project_data.equipment_entity
         self._equipment_port_entity = project_data.equipment_port_entity
         self._performance_group_list = project_data.performance_group_list
 
         self.call_reload_all_ui.emit()
+
+    def save_to_cargo(self) -> ProjectDataCargo:
+        """EntityをProjectDataCargoに保存する"""
+        return ProjectDataCargo(
+            equipment_entity=self._equipment_entity,
+            equipment_port_entity=self._equipment_port_entity,
+            performance_group_list=self._performance_group_list,
+        )
 
     def __repr__(self) -> str:
         return f"DataManager(equipment_entity={self._equipment_entity}, equipment_port_entity={self._equipment_port_entity}, performance_group_list={self._performance_group_list})"

@@ -95,14 +95,13 @@ class AppController(QObject):
             )  # 仮で同じviewを追加しているだけです。
             tab_names.append(model.tab_name)
 
-        # XXX:めっちゃ雑名処理!
-        # 今後直してください。そもそもリストを得て欲しい!
         PerformanceTabController(
             self.main_window.tabs,
             PerformanceGroupModel(group=self._data_mangeger._performance_group_list),
         ).set_tabs(list(zip(tab_names, self.worksheet_widgets, self.patch_views)))
 
     def load_mock_project(self, mock_file_name: str = "full_mock_data.json"):
+        """開発用のモックJSONを読み込んでプロジェクトを立ち上げる"""
         repository = ProjectRepository()
         cargo = repository.load_mock(mock_file_name)
         self._data_mangeger.load_by_cargo(cargo)
@@ -110,20 +109,12 @@ class AppController(QObject):
     # モックでデータマネージャーを構築する
     @staticmethod
     def factory_by_mock() -> AppController:
-        print("AppControllerのfactoryを呼んでいる。早めに移行せよ")
+        print("悪いfactoryを呼んでいる。早めに移行せよ")
         return AppController(None, mock_data.equipment_data, mock_data.port_data)
 
     @Slot()
     def change_performance(self):
         """公演を切り替える"""
-
-    @property
-    def equipments(self):
-        return self._equipments
-
-    @property
-    def equipment_ports(self):
-        return self._equipment_ports
 
     @property
     def data_mangeger(self):
