@@ -1,12 +1,28 @@
 from PySide6.QtCore import QAbstractItemModel
-from PySide6.QtWidgets import QHeaderView, QLabel, QTableView, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QComboBox,
+    QHeaderView,
+    QLabel,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class AudioPatchView(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        QLabel()
         self.v_layout = QVBoxLayout()
+        self.label = QLabel("きり変え画面")
+        self.v_layout.addWidget(self.label)
+        self.combo = QComboBox()
+        self.v_layout.addWidget(self.combo)
+
+        self.setLayout(self.v_layout)
+
+    def set_combo_items(self, items: list[str]):
+        self.combo.clear()
+        self.combo.addItems(items)
 
 
 # パッチ画面用のテーブルを表示します。

@@ -1,3 +1,5 @@
+from .app_controller import AppController
+from .audio_patch_controller import AudioPatchController
 from .live_info_controller import LiveInfoController
 from .performance_tab_controller import PerformanceTabController
 from .performance_views_selector_controller import PerformanceViewSelectorController
