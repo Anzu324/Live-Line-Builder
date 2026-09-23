@@ -81,7 +81,9 @@ class AppController(QObject):
 
         self.worksheet_widgets: list[PlanSheetView] = []
         self.worksheet_ctrls: list[PlanSheetController] = []
-        self.audio_patch_ctrls: list[AudioPatchController] = []# ここに置くべきか甚だ疑問だが仮で設置致します。
+        self.audio_patch_ctrls: list[
+            AudioPatchController
+        ] = []  # ここに置くべきか甚だ疑問だが仮で設置致します。
         self.patch_views: list[QWidget] = []
         for model in self.performance_data:
             view = PlanSheetView(
@@ -92,10 +94,10 @@ class AppController(QObject):
             )
             self.worksheet_widgets.append(view)
             self.worksheet_ctrls.append(PlanSheetController(view, model))
-            self.audio_patch_ctrls.append(AudioPatchController(AudioPatchView(), ["a", "b"]))
-            self.patch_views.append(
-                self.audio_patch_ctrls[-1].view
+            self.audio_patch_ctrls.append(
+                AudioPatchController(AudioPatchView(), ["a", "b"])
             )
+            self.patch_views.append(self.audio_patch_ctrls[-1].view)
             tab_names.append(model.tab_name)
 
         PerformanceTabController(
