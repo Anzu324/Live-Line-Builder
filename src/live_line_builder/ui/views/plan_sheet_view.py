@@ -11,9 +11,12 @@ from live_line_builder.ui.views.table import (
 )
 
 
-# メインコンテンツビューのクラス
-# メインコンテンツビューとは、中央にある、図や表を表示する為のウィジェットです。
 class PlanSheetView(QWidget):
+    """仕込み図のView
+
+    PDFに印刷可能な画面をプレビューしつつそのままカスタムできるページです。
+    """
+
     view_tab_name = "仕込み図"  # タブ名を設定
 
     def __init__(
