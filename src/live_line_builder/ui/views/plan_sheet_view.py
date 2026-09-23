@@ -40,7 +40,9 @@ class PlanSheetView(QWidget):
         self.multi_column_layout = QVBoxLayout()  # マルチの列のレイアウトを作成
         self.multi_column_layout.setContentsMargins(0, 0, 0, 0)
         self.multi_column_layout.setSpacing(1)  # レイアウトの余白を1に設定
-        self.multi_table_views = []  # マルチの列のテーブルビューを保持するリスト
+        self.multi_table_views: list[
+            EquipmentTableView
+        ] = []  # マルチの列のテーブルビューを保持するリスト
 
         for x in multi_id_list:
             proxy_model = MultiFilterProxyModel()
