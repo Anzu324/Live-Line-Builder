@@ -12,6 +12,7 @@ from live_line_builder.ui.controllers.performance_tab_controller import (
 )
 from live_line_builder.ui.controllers.plan_sheet_controller import PlanSheetController
 from live_line_builder.ui.models import (
+    AudioPatchSystemAttributesModel,
     DataManager,
     EquipmentModel,
     EquipmentPortModel,
@@ -85,7 +86,9 @@ class AppController(QObject):
             AudioPatchController
         ] = []  # ここに置くべきか甚だ疑問だが仮で設置致します。
         self.patch_views: list[QWidget] = []
-        for model in self.performance_data:
+        for model, group in zip(
+            self.performance_data, self._data_mangeger._performance_group_list
+        ):  # XXX:処理が汚くなってきたので整理が必須。
             view = PlanSheetView(
                 self._equipments,
                 self._equipment_ports,
@@ -95,7 +98,9 @@ class AppController(QObject):
             self.worksheet_widgets.append(view)
             self.worksheet_ctrls.append(PlanSheetController(view, model))
             self.audio_patch_ctrls.append(
-                AudioPatchController(AudioPatchView(), ["a", "b"])
+                AudioPatchController(
+                    AudioPatchView(), AudioPatchSystemAttributesModel(group._audiopatch)
+                )
             )
             self.patch_views.append(self.audio_patch_ctrls[-1].view)
             tab_names.append(model.tab_name)

@@ -24,7 +24,7 @@ def patch_system():
     sys._add_equipment(EquipmentInstance(EQ_VO, "Vo.Mic", NodeType.MIC))
     sys._add_equipment(EquipmentInstance(EQ_LG, "LG.Amp", NodeType.INSTRUMENT))
     sys._add_equipment(EquipmentInstance(EQ_LG_MIC, "LG.Mic", NodeType.MIC))
-    sys._add_equipment(EquipmentInstance(EQ_SB, "StageBox16", NodeType.STAGE_BOX))
+    sys._add_equipment(EquipmentInstance(EQ_SB, "MultiBox16", NodeType.MULTI_BOX))
     sys._add_equipment(EquipmentInstance(EQ_MIX, "MG24/14FX Console", NodeType.MIXER))
 
     # 楽器ポート

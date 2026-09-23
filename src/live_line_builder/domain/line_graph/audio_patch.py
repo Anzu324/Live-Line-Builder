@@ -14,7 +14,7 @@ PortID = NewType("PortID", str)
 class NodeType(Enum):
     INSTRUMENT = "Instrument"
     MIC = "Microphone"
-    STAGE_BOX = "StageBox"
+    MULTI_BOX = "MultiBox"
     MIXER = "Mixer"
     PROCESSOR = "Processor"
     MAIN_AMP = "MainAmp"
@@ -264,7 +264,7 @@ class AudioPatchSystem:
         for port_id in self._traverse_downstream(out_ports[0].id):
             port = self.ports[port_id]
             eq = self.equipments[port.equipment_id]
-            if eq.type == NodeType.STAGE_BOX and port.direction == PortDirection.OUT:
+            if eq.type == NodeType.MULTI_BOX and port.direction == PortDirection.OUT:
                 sb_out_port = port
                 break
 

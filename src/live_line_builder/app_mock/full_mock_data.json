@@ -23,7 +23,7 @@
     {
       "equip_id": "equip_0002",
       "name": "CANARE 12ch",
-      "equip_type": "StageBox",
+      "equip_type": "MultiBox",
       "quantity": 1,
       "ports": [
         {"port_id": "eq2_p01", "name": "Ch 1 In", "connector": "XLR-F", "flow": "IN"},
@@ -39,7 +39,7 @@
     {
       "equip_id": "equip_0003",
       "name": "CP20Multi",
-      "equip_type": "StageBox",
+      "equip_type": "MultiBox",
       "quantity": 1,
       "ports": [
         {"port_id": "eq3_p01", "name": "Ch 1 In", "connector": "XLR-F", "flow": "IN"},
@@ -101,7 +101,7 @@
           {
             "equip_id": "patch_eq_sb",
             "name": "StageBox 12ch",
-            "equip_type": "StageBox",
+            "equip_type": "MultiBox",
             "ports": [
               {"port_id": "sb_in1", "name": "Ch1 In", "connector": "XLR-F", "flow": "IN"},
               {"port_id": "sb_out1", "name": "Ch1 Out", "connector": "XLR-M", "flow": "OUT"},
@@ -165,4 +165,3 @@
     }
   ]
 }
-

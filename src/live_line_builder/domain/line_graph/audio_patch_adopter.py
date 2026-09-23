@@ -28,8 +28,8 @@ def _coerce_node_type(value: str) -> NodeType:
         return NodeType.MIC
     if normalized in {"instrument", "guitar", "bass", "keyboard", "drum"}:
         return NodeType.INSTRUMENT
-    if normalized in {"stagebox", "stage_box", "multicore"}:
-        return NodeType.STAGE_BOX
+    if normalized in {"stagebox", "stage_box", "multicore", "multibox"}:
+        return NodeType.MULTI_BOX
     if normalized in {"mixer", "console"}:
         return NodeType.MIXER
     if normalized in {"processor", "fx", "effect"}:

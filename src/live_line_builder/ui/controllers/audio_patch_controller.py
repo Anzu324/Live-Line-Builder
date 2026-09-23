@@ -1,13 +1,16 @@
 from PySide6.QtCore import QObject
 
+from live_line_builder.ui.models import AudioPatchSystemAttributesModel
 from live_line_builder.ui.views.audio_patch_view import AudioPatchView
 
 
 class AudioPatchController(QObject):
-    def __init__(self, view: AudioPatchView, equip_list: list[str]):
+    def __init__(
+        self, view: AudioPatchView, attributes_model: AudioPatchSystemAttributesModel
+    ):
         self._view = view
-        self._equip_list = equip_list
-        self._view.set_combo_items(equip_list)
+        self._attributes_model = attributes_model
+        self._view.set_combo_items(attributes_model.gateway_equipments_name)
 
     @property
     def view(self) -> AudioPatchView:

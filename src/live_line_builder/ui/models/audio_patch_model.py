@@ -1,6 +1,6 @@
-from PySide6.QtCore import QAbstractTableModel, Qt
+from PySide6.QtCore import QAbstractTableModel, QObject, Qt
 
-from live_line_builder.domain.line_graph import AudioPatchSystem
+from live_line_builder.domain.line_graph import AudioPatchSystem, NodeType
 
 """
 ここのモデルは機器の情報であってライブでどのように接続するかの情報でない。
@@ -8,7 +8,30 @@ from live_line_builder.domain.line_graph import AudioPatchSystem
 """
 
 
-# 各機材の情報を保持するモデルクラス
+class AudioPatchSystemAttributesModel(QObject):
+    """AudioPatchSystemの属性へのアクセスを提供する。
+
+    例:機材数やポート数など統計的な情報。
+    個別の部分への直接のアクセスは提供しない。
+    """
+
+    def __init__(self, entity: AudioPatchSystem | None = None):
+        self._entity = entity
+
+    @property
+    def gateway_equipments_name(self) -> list[str]:
+        """ミキサーやマルチなど表示起点になれる機材だけをリストアップして名前を返す"""
+        # TODO:フィルタリング機能は未実装。
+        if self._entity is None:
+            return []
+        return [
+            eq.name
+            for eq in self._entity.equipments.values()
+            if eq.type in [NodeType.MIXER, NodeType.MULTI_BOX]
+        ]
+
+
+# パッチ情報を表にまとめて表示するためのモデル。未完。
 class PatchTableModel(QAbstractTableModel):
     def __init__(self, data: AudioPatchSystem, base_point_id: str, parent=None):
         super().__init__(parent)
