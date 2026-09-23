@@ -9,7 +9,7 @@ from live_line_builder.domain.line_graph.audio_patch import (
     PortGender,
     PortInstance,
 )
-from live_line_builder.ui.models.patch_table_model import PatchTableModel
+from live_line_builder.ui.models.audio_patch_model import PatchTableModel
 
 
 @pytest.fixture

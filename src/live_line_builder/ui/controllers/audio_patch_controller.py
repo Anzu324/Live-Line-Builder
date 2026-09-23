@@ -4,7 +4,7 @@ from live_line_builder.ui.views.audio_patch_view import AudioPatchView
 
 
 class AudioPatchController(QObject):
-    def __init__(self, view: AudioPatchView, equip_list:list[str]):
+    def __init__(self, view: AudioPatchView, equip_list: list[str]):
         self._view = view
         self._equip_list = equip_list
         self._view.set_combo_items(equip_list)
