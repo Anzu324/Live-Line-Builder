@@ -5,10 +5,12 @@ from live_line_builder.storages.serializer import ProjectSerializer
 
 
 class ProjectRepository:
-    def __init__(self):
-        self._serializer = ProjectSerializer()
+    def __init__(self) -> None:
+        self._serializer: ProjectSerializer = ProjectSerializer()
 
-    def load_mock(self, mock_file_name: str = "full_mock_data.json"):
+    def load_mock(
+        self, mock_file_name: str = "full_mock_data.json"
+    ) -> ProjectDataCargo:
         """
         AppMockディレクトリ内のモックJSONを読み込む仮コード(開発・テスト用ヘルパー)
         """

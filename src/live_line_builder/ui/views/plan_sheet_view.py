@@ -28,7 +28,7 @@ class PlanSheetView(QWidget):
         self.h_layout = QHBoxLayout()  # 垂直方向のレイアウトを作成
 
         # ライブ情報エリア
-        self.form = LiveInfoView()
+        self.form: QWidget = LiveInfoView()
         self.v_layout.addWidget(self.form)
         self.grand_plan = GroundPlanView()
         self.v_layout.addWidget(self.grand_plan)
@@ -76,7 +76,7 @@ class PlanSheetView(QWidget):
         self.v_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.v_layout)
 
-    def replace_form(self, new_widget: QWidget):
+    def replace_form(self, new_widget: QWidget) -> None:
         # すでに差し替え済み（None）なら何もしない
         if not self.form:
             return

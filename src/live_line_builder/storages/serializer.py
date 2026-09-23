@@ -39,12 +39,12 @@ class ProjectSerializer:
         """JSON(ネスト) ➔ Entity(フラット)"""
         schema = ProjectDataSchema.model_validate_json(json_str)
 
-        equip_rows = []
-        port_rows = []
+        equip_rows: list[dict[str, Any]] = []
+        port_rows: list[dict[str, Any]] = []
 
         for equip in schema.equipments:
             # 1. Equipment 本体のデータ (portsを除外してdict化)
-            equip_dict = equip.model_dump(exclude={"ports"})
+            equip_dict: dict[str, Any] = equip.model_dump(exclude={"ports"})
             equip_rows.append(equip_dict)
 
             # 2. ネストされた ports を展開し、親の equip_id を注入する
