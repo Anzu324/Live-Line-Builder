@@ -132,7 +132,7 @@ class PatchTableModel(QAbstractTableModel):
     def setData(self, index, value, role: int = Qt.ItemDataRole.EditRole):
         if role == Qt.ItemDataRole.EditRole:
             # 入力されたvalueをデータに反映
-            #self._data[index.row()][index.column()] = value
+            # self._data[index.row()][index.column()] = value
             # データが変更されたことをViewに通知（これがないと画面が更新されない）
             self.dataChanged.emit(index, index)
             return True

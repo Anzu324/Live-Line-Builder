@@ -9,7 +9,7 @@ from live_line_builder.domain.line_graph.audio_patch import (
     PortGender,
     PortInstance,
 )
-from live_line_builder.ui.models.audio_patch_model import PatchTableModel
+from live_line_builder.ui.models.audio_patch_model import PatchTableModel, Stream
 
 
 @pytest.fixture
@@ -84,4 +84,5 @@ def test_generate_model(patch_system):
 
 def test_get_model_column_length(patch_system):
     model = PatchTableModel(patch_system, EQ_SB)
+    model.change_base_point(EQ_SB, Stream.INPUT)
     assert model.columnCount() == 6

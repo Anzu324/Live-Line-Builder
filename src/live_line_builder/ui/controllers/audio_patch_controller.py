@@ -10,7 +10,10 @@ from live_line_builder.ui.views.audio_patch_view import AudioPatchView
 
 class AudioPatchController(QObject):
     def __init__(
-        self, view: AudioPatchView, attributes_model: AudioPatchSystemAttributesModel, parent: QObject | None = None,
+        self,
+        view: AudioPatchView,
+        attributes_model: AudioPatchSystemAttributesModel,
+        parent: QObject | None = None,
     ):
         super().__init__(parent)
         self._view = view
