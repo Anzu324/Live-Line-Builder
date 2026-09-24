@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QTableView,
+    QTableWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -17,6 +18,8 @@ class AudioPatchView(QWidget):
         self.v_layout.addWidget(self.label)
         self.combo = QComboBox()
         self.v_layout.addWidget(self.combo)
+        self.table = QTableWidget()
+        self.v_layout.addWidget(self.table)
 
         self.setLayout(self.v_layout)
 
