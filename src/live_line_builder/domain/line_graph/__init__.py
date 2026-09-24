@@ -1,1 +1,1 @@
-from .audio_patch import AudioPatchSystem, NodeType
+from .audio_patch import AudioPatchSystem, EquipmentInstance, NodeType
