@@ -110,8 +110,13 @@ def build_equipment_instance(
         PortID(i.input_port): {PortID(j) for j in i.output_ports}
         for i in fileterd_links
     }
+    backward_innner_links = {
+        PortID(j): PortID(i.input_port) for i in fileterd_links for j in i.output_ports
+    }
 
-    return EquipmentDTO(eq_instance, ports_instances, forward_inner_links, dict())
+    return EquipmentDTO(
+        eq_instance, ports_instances, forward_inner_links, backward_innner_links
+    )
 
 
 def register_equipment_definition(
