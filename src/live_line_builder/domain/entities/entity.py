@@ -1,4 +1,9 @@
-from .columns import EQUIPMENT_COLUMNS, EQUIPMENT_PORT_COLUMNS, SETLIST_COLUMNS
+from .columns import (
+    EQUIPMENT_COLUMNS,
+    EQUIPMENT_INNER_LINKS_COLUMNS,
+    EQUIPMENT_PORT_COLUMNS,
+    SETLIST_COLUMNS,
+)
 from .table_entity import TableEntity, TableRowModel
 
 
@@ -19,6 +24,14 @@ class EquipmentPortRow(TableRowModel):
     equip_id: str
     connector: str
     flow: str
+
+
+class EquipmentInnerLinksRow(TableRowModel):
+    """機材内部配線行モデル"""
+
+    equip_id: str
+    input_port: str
+    output_ports: list[str]
 
 
 class SetListRow(TableRowModel):
@@ -43,6 +56,13 @@ class EquipmentPortDefinition(TableEntity[EquipmentPortRow]):
 
     row_type = EquipmentPortRow
     columns = EQUIPMENT_PORT_COLUMNS
+
+
+class EquipmentInnerLinksDefinition(TableEntity[EquipmentInnerLinksRow]):
+    """機材内部配線情報テーブル"""
+
+    row_type = EquipmentInnerLinksRow
+    columns = EQUIPMENT_INNER_LINKS_COLUMNS
 
 
 class SetListEntity(TableEntity[SetListRow]):

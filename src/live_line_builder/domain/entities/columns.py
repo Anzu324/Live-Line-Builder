@@ -15,6 +15,12 @@ EQUIPMENT_PORT_COLUMNS = [
     Column(key="flow", header="流れ"),
 ]
 
+EQUIPMENT_INNER_LINKS_COLUMNS = [
+    Column(key="equip_id", header="機材", editable=False),
+    Column(key="input_port", header="入力"),
+    Column(key="output_ports", header="出力"),
+]
+
 SETLIST_COLUMNS = [
     Column(key="slot", header="SONG", editable=False),
     Column(key="group", header="BAND"),

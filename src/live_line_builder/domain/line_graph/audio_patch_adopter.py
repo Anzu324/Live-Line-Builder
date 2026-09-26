@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from live_line_builder.domain.entities import (
     EquipmentDefinition,
+    EquipmentInnerLinksDefinition,
+    EquipmentInnerLinksRow,
     EquipmentPortDefinition,
     EquipmentPortRow,
     EquipmentRow,
@@ -73,8 +75,7 @@ def _coerce_port_channel_no(value: str | int | None) -> int | None:
 def build_equipment_instance(
     equipment_definition: EquipmentRow,
     ports: EquipmentDefinition,
-    inner_links_upstream: dict,
-    inner_links_downstream: dict,
+    inner_links: EquipmentInnerLinksDefinition,
 ) -> EquipmentDTO:
     eq_instance = EquipmentInstance(
         EquipmentID(equipment_definition.equip_id),
@@ -98,7 +99,19 @@ def build_equipment_instance(
         )
         for i in fileterd_ports
     }
-    return EquipmentDTO(eq_instance, ports_instances, dict(), dict())
+
+    fileterd_links: list[EquipmentInnerLinksRow] = [
+        inner_links[i]
+        for i in range(inner_links.column_size())
+        if inner_links.get_item(i, "equip_id")
+        == equipment_definition.name  # 対象機材のコネクタのみを絞って検索
+    ]
+    forward_inner_links = {
+        PortID(i.input_port): {PortID(j) for j in i.output_ports}
+        for i in fileterd_links
+    }
+
+    return EquipmentDTO(eq_instance, ports_instances, forward_inner_links, dict())
 
 
 def register_equipment_definition(

@@ -1,5 +1,7 @@
 from .entity import (
     EquipmentDefinition,
+    EquipmentInnerLinksDefinition,
+    EquipmentInnerLinksRow,
     EquipmentPortDefinition,
     EquipmentPortRow,
     EquipmentRow,
@@ -14,6 +16,8 @@ from .table_entity import Column, TableEntity, TableRowModel
 __all__ = [
     "Column",
     "EquipmentDefinition",
+    "EquipmentInnerLinksDefinition",
+    "EquipmentInnerLinksRow",
     "EquipmentPortDefinition",
     "EquipmentPortRow",
     "EquipmentRow",
