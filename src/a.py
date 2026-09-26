@@ -9,7 +9,6 @@ from PySide6.QtGui import (
     QColor,
     QFont,
     QPainter,
-    QPixmap,
     QStandardItem,
     QStandardItemModel,
 )
