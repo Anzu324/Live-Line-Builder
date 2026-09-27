@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from live_line_builder.domain.entities import (
     EquipmentDefinition,
     EquipmentInnerLinksDefinition,
