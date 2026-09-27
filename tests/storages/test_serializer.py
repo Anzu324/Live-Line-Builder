@@ -6,8 +6,8 @@ from live_line_builder.domain.entities import (
     PerformanceGroup,
 )
 from live_line_builder.domain.line_graph.audio_patch import (
+    EquipmentCategory,
     EquipmentID,
-    NodeType,
     PortID,
 )
 from live_line_builder.storages.serializer import ProjectSerializer
@@ -86,8 +86,13 @@ def test_performance_group_loaded():
     patch_sys1 = day1._audiopatch
     assert len(patch_sys1.equipments) == 4
     assert "patch_eq_vo1" in patch_sys1.equipments
-    assert patch_sys1.equipments[EquipmentID("patch_eq_vo1")].type == NodeType.MIC
-    assert patch_sys1.equipments[EquipmentID("patch_eq_console")].type == NodeType.MIXER
+    assert (
+        patch_sys1.equipments[EquipmentID("patch_eq_vo1")].type == EquipmentCategory.MIC
+    )
+    assert (
+        patch_sys1.equipments[EquipmentID("patch_eq_console")].type
+        == EquipmentCategory.MIXER
+    )
 
     assert "vo1_out" in patch_sys1.ports
     assert "sb_in1" in patch_sys1.ports

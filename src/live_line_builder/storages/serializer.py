@@ -8,9 +8,9 @@ from live_line_builder.domain.entities import (
     ProjectDataCargo,
 )
 from live_line_builder.domain.line_graph.audio_patch import (
+    EquipmentCategory,
     EquipmentID,
     EquipmentInstance,
-    NodeType,
     PortDirection,
     PortGender,
     PortID,
@@ -76,7 +76,7 @@ class ProjectSerializer:
                 for eq_schema in audio_schema.equipments:
                     # NodeTypeの変換（大文字小文字や値のマッチング）
                     node_type = None
-                    for nt in NodeType:
+                    for nt in EquipmentCategory:
                         if (
                             nt.value.lower() == eq_schema.equip_type.lower()
                             or nt.name.lower() == eq_schema.equip_type.lower()
@@ -84,7 +84,7 @@ class ProjectSerializer:
                             node_type = nt
                             break
                     if node_type is None:
-                        node_type = NodeType.INSTRUMENT
+                        node_type = EquipmentCategory.INSTRUMENT
 
                     eq = EquipmentInstance(
                         id=EquipmentID(eq_schema.equip_id),

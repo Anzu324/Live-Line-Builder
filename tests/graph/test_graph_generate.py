@@ -3,31 +3,35 @@ import pytest
 from graph.const import *
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
+    DuplicateIDError,
+    EquipmentCategory,
+    EquipmentDTO,
     EquipmentInstance,
-    NodeType,
+    InvalidConnectionError,
     PortDirection,
     PortGender,
     PortInstance,
-    WrongPortConnectionError,
+    PortNotFoundError,
 )
 
 
 @pytest.fixture
 def patch_system():
-    """
-    各テストで共通して使用する初期状態のシステム(Fixture)
-    元のコードのヒント「4. テスト用シナリオ」に沿ったデータを準備します。
-    """
+    """各テストで共通して使用する初期状態のシステム(Fixture)"""
     sys = AudioPatchSystem()
 
     # --- [Arrange] 事前データの準備 ---
-    sys._add_equipment(EquipmentInstance(EQ_VO, "Vo.Mic", NodeType.MIC))
-    sys._add_equipment(EquipmentInstance(EQ_LG, "LG.Amp", NodeType.INSTRUMENT))
-    sys._add_equipment(EquipmentInstance(EQ_LG_MIC, "LG.Mic", NodeType.MIC))
-    sys._add_equipment(EquipmentInstance(EQ_SB, "MultiBox16", NodeType.MULTI_BOX))
-    sys._add_equipment(EquipmentInstance(EQ_MIX, "MG24/14FX Console", NodeType.MIXER))
+    sys._add_equipment(EquipmentInstance(EQ_VO, "Vo.Mic", EquipmentCategory.MIC))
+    sys._add_equipment(EquipmentInstance(EQ_LG, "LG.Amp", EquipmentCategory.INSTRUMENT))
+    sys._add_equipment(EquipmentInstance(EQ_LG_MIC, "LG.Mic", EquipmentCategory.MIC))
+    sys._add_equipment(
+        EquipmentInstance(EQ_SB, "MultiBox16", EquipmentCategory.MULTI_BOX)
+    )
+    sys._add_equipment(
+        EquipmentInstance(EQ_MIX, "MG24/14FX Console", EquipmentCategory.MIXER)
+    )
 
-    # 楽器ポート
+    # 楽器・マイクポート
     sys._add_port(
         PortInstance(VO_OUT, "Out", PortDirection.OUT, PortGender.MALE, EQ_VO)
     )
@@ -70,9 +74,26 @@ def patch_system():
     # テスト用のAux出力(オス) - 性別エラー検証用
     sys._add_port(
         PortInstance(
-            MIX_AUX1_OUT, "Aux1 Out", PortDirection.OUT, PortGender.MALE, EQ_MIX
+            MIX_AUX1_OUT,
+            "Aux1 Out",
+            PortDirection.OUT,
+            PortGender.MALE,
+            EQ_MIX,
         )
     )
+
+    # 機材内部の配線設定 (IN -> OUT への内部経路)
+    # LG_MIC: IN -> OUT
+    sys.forward_edges.setdefault(LG_MIC_IN, set()).add(LG_MIC_OUT)
+    sys.backward_edges[LG_MIC_OUT] = LG_MIC_IN
+
+    # StageBox Ch1: IN1 -> OUT1
+    sys.forward_edges.setdefault(SB_IN1, set()).add(SB_OUT1)
+    sys.backward_edges[SB_OUT1] = SB_IN1
+
+    # StageBox Ch2: IN2 -> OUT2
+    sys.forward_edges.setdefault(SB_IN2, set()).add(SB_OUT2)
+    sys.backward_edges[SB_OUT2] = SB_IN2
 
     return sys
 
@@ -90,6 +111,28 @@ def test_add_equipment_and_port(patch_system):
     assert VO_OUT in patch_system.forward_edges
 
 
+def test_add_equipment_dto_duplicate_error(patch_system):
+    """重複したポートIDを持つEquipmentDTOを追加した際、DuplicateIDErrorが発生するか"""
+    duplicate_dto = EquipmentDTO(
+        equipment=EquipmentInstance(
+            EquipmentID("eq_dup"), "Duplicate", EquipmentCategory.MIC
+        ),
+        ports={
+            VO_OUT: PortInstance(
+                VO_OUT,
+                "DupOut",
+                PortDirection.OUT,
+                PortGender.MALE,
+                EquipmentID("eq_dup"),
+            )
+        },
+        downstream_edges={},
+        upstream_edges={},
+    )
+    with pytest.raises(DuplicateIDError):
+        patch_system.add_equipment(duplicate_dto)
+
+
 def test_connect_ports_success(patch_system):
     """正常にポート同士が結線されるか"""
     patch_system.connect_ports(VO_OUT, SB_IN1)
@@ -100,17 +143,26 @@ def test_connect_ports_success(patch_system):
     assert patch_system.backward_edges[SB_IN1] == VO_OUT
 
 
+def test_connect_ports_not_found_error(patch_system):
+    """存在しないポートを指定した際に PortNotFoundError が発生するか"""
+    with pytest.raises(PortNotFoundError):
+        patch_system.connect_ports(PortID("invalid_out"), SB_IN1)
+
+    with pytest.raises(PortNotFoundError):
+        patch_system.connect_ports(VO_OUT, PortID("invalid_in"))
+
+
 def test_connect_ports_same_direction_error(patch_system):
-    """同属性（OUT同士、IN同士）の接続でエラーが発生するか"""
+    """同属性（OUT同士、IN同士）の接続で InvalidConnectionError が発生するか"""
     # OUT同士
     with pytest.raises(
-        WrongPortConnectionError, match="同属性（OUT同士）は接続できません。"
+        InvalidConnectionError, match="同属性（OUT同士）のポートは接続できません"
     ):
         patch_system.connect_ports(VO_OUT, LG_OUT)
 
     # IN同士
     with pytest.raises(
-        WrongPortConnectionError, match="同属性（IN同士）は接続できません。"
+        InvalidConnectionError, match="同属性（IN同士）のポートは接続できません"
     ):
         patch_system.connect_ports(SB_IN1, SB_IN2)
 
@@ -136,102 +188,47 @@ def test_get_required_conversion(patch_system):
     # 正常（MALE -> FEMALE）
     assert patch_system.get_required_conversion(VO_OUT, SB_IN1) is None
 
-    # 異常: MALE -> MALE (例: ミキサーAUXからStageBoxのOUTに繋ぐような誤配線チェック)
+    # 異常: MALE -> MALE
     assert patch_system.get_required_conversion(MIX_AUX1_OUT, SB_OUT2) == "要 M-M変換"
 
 
 # ==========================================
-# 自動パッチング (高度な機能) のテスト
+# 探索・長さ計算機能のテスト
 # ==========================================
 
 
-def test_auto_patch_mixer_from_stagebox_success(patch_system):
-    """【正常系1】StageBoxのCh指定による自動パッチングが成功するか"""
-    # [Arrange] 舞台上の仕込み配線 (Vo -> マルチCh1)
+def test_get_upstream_port_count(patch_system):
+    """入力側へたどった時の最深ポートまでのノード数を計算"""
+    # 1. Vo.Mic -> StageBox Ch1 -> Mixer Ch1 の経路 (長さ: 4)
     patch_system.connect_ports(VO_OUT, SB_IN1)
+    patch_system.connect_ports(SB_OUT1, MIX_IN1)
+    assert patch_system.get_upstream_port_count(MIX_IN1) == 4
+    # 経路: MIX_IN1(1) -> SB_OUT1(2) -> SB_IN1(3) -> VO_OUT(4)
 
-    # [Act] ミキサーのCh1にマルチのCh1をパッチング
-    found_inst = patch_system.auto_patch_mixer_from_stagebox(
-        mixer_in_port_id="mix_in1", stagebox_eq_id="eq_sb", ch_no=1
-    )
-
-    # [Assert] 結線が完了し、上流のVo.Micが返却されること
-    assert found_inst is not None
-    assert found_inst.id == "eq_vo"
-    assert found_inst.name == "Vo.Mic"
-    # ミキサー入力側に正しく繋がっているか
-    assert MIX_IN1 in patch_system.forward_edges[SB_OUT1]
+    # 2. LG.Amp -> LG.Mic -> StageBox Ch2 -> Mixer Ch2 の経路 (長さ: 6)
+    patch_system.connect_ports(LG_OUT, LG_MIC_IN)
+    patch_system.connect_ports(LG_MIC_OUT, SB_IN2)
+    patch_system.connect_ports(SB_OUT2, MIX_IN2)
+    assert patch_system.get_upstream_port_count(MIX_IN2) == 6
+    # 経路: MIX_IN2(1) -> SB_OUT2(2) -> SB_IN2(3) -> LG_MIC_OUT(4) -> LG_MIC_IN(5) -> LG_OUT(6)
 
 
-def test_auto_patch_mixer_from_stagebox_not_found(patch_system):
-    """【異常系】存在しないCh番号を指定した場合のエラー"""
-    with pytest.raises(
-        ValueError, match=r"指定されたStageBox\(Ch.99\)の出力ポートが見つかりません。"
-    ):
-        patch_system.auto_patch_mixer_from_stagebox(
-            mixer_in_port_id=MIX_IN1, stagebox_eq_id=EQ_SB, ch_no=99
-        )
+def test_get_upstream_ports(patch_system):
+    """指定ポートから上流に辿れるポートリストを取得できるか"""
+    patch_system.connect_ports(VO_OUT, SB_IN1)
+    patch_system.connect_ports(SB_OUT1, MIX_IN1)
+
+    upstream_list = patch_system.get_upstream_ports(MIX_IN1)
+
+    # 起点から順に上流へ辿ったリストになっているか確認
+    assert upstream_list == [MIX_IN1, SB_OUT1, SB_IN1, VO_OUT]
 
 
-def test_auto_patch_mixer_from_instrument_success(patch_system):
-    """【正常系2】楽器指定による自動パッチングが成功するか"""
-    # [Arrange] 舞台上の仕込み配線 (LG -> マルチCh2)
-    patch_system.connect_ports(LG_OUT, SB_IN2)
+def test_get_downstream_equipment_length(patch_system):
+    """通過する機材の台数を正しくカウントできるか"""
+    patch_system.connect_ports(VO_OUT, SB_IN1)
+    patch_system.connect_ports(SB_OUT1, MIX_IN1)
 
-    # [Act] 楽器(LG)を指定してミキサーにパッチング
-    sb_out_port = patch_system.auto_patch_mixer_from_instrument(
-        mixer_in_port_id=MIX_IN2, instrument_eq_id=EQ_LG
-    )
-
-    # [Assert] 経由したStageBoxの出力ポートが返却され、結線が完了していること
-    assert sb_out_port is not None
-    assert sb_out_port.id == SB_OUT2
-    assert MIX_IN2 in patch_system.forward_edges[SB_OUT2]
-
-
-def test_auto_patch_mixer_from_instrument_not_connected(patch_system):
-    """【異常系1】StageBoxに未配線の楽器を指定した場合のエラー"""
-    # Gt.Ampはどこにも繋がっていない状態
-    with pytest.raises(
-        ValueError, match="この楽器はStageBoxまで回線が到達していません。"
-    ):
-        patch_system.auto_patch_mixer_from_instrument(
-            mixer_in_port_id=MIX_IN2, instrument_eq_id=EQ_LG
-        )
-
-
-def test_auto_patch_mixer_from_instrument_no_out_ports(patch_system):
-    """【異常系】出力ポートを持たない楽器を指定した場合のエラー"""
-    # 出力ポートを持たないダミー楽器を追加
-    patch_system._add_equipment(
-        EquipmentInstance(EquipmentID("eq_dummy"), "Dummy", NodeType.INSTRUMENT)
-    )
-
-    with pytest.raises(
-        WrongPortConnectionError, match="指定された楽器に出力ポートが存在しません。"
-    ):
-        patch_system.auto_patch_mixer_from_instrument(
-            mixer_in_port_id=MIX_IN2, instrument_eq_id=EquipmentID("eq_dummy")
-        )
-
-
-def test_downstream_length(patch_system):
-    """入力側へたどった時の最深ノードまでの数を計算"""
-    patch_system.connect_ports("vo_out", "sb_in1")
-    patch_system.connect_ports("sb_out1", "mix_in1")
-    assert patch_system.get_upstream_length("mix_in1") == 4
-    # ("mix_in1", 1)
-    # ("sb_out1", 2)
-    # ("sb_in1", 3)
-    # ("vo_out", 4)
-    patch_system.connect_ports("lg_out", "lg_mic_in")
-    patch_system.connect_ports("lg_out", "lg_mic_in")
-    patch_system.connect_ports("lg_mic_out", "sb_in2")
-    patch_system.connect_ports("sb_out2", "mix_in2")
-    assert patch_system.get_upstream_length("mix_in2") == 6
-    # ("mix_in2", 1)
-    # ("sb_out2", 2)
-    # ("sb_in2", 3)
-    # ("lg_mic_out", 4)
-    # ("lg_mic_in", 5)
-    # ("lg_out", 6)
+    # VO_OUT 起点で下流へ向かうと Vo.Mic(1) -> StageBox(2) -> Mixer(3) で計 3 台
+    eq_count = patch_system.get_downstream_equipment_length(VO_OUT)
+    assert eq_count == 3

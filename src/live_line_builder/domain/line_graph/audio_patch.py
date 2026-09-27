@@ -11,13 +11,13 @@ EquipmentID = NewType("EquipmentID", str)
 PortID = NewType("PortID", str)
 
 
-class NodeType(Enum):
+class EquipmentCategory(Enum):
     INSTRUMENT = "Instrument"
     MIC = "Microphone"
     MULTI_BOX = "MultiBox"
     MIXER = "Mixer"
     PROCESSOR = "Processor"
-    MAIN_AMP = "MainAmp"
+    POWER_AMP = "PowerAmp"
     SPEAKER = "Speaker"
 
 
@@ -72,6 +72,7 @@ class DuplicateIDError(AudioPatchError):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(duplicate_ids={self.duplicate_ids!r})"
 
+
 class PortNotFoundError(AudioPatchError):
     """指定されたポートが存在しない際のエラー"""
 
@@ -117,7 +118,7 @@ class PortInstance:
 class EquipmentInstance:
     id: EquipmentID
     name: str
-    type: NodeType
+    type: EquipmentCategory
 
 
 @dataclass
@@ -128,9 +129,9 @@ class EquipmentDTO:
     """
 
     equipment: EquipmentInstance
-    port: dict[PortID, PortInstance]
-    forward_edges: dict[PortID, set[PortID]]
-    backward_edges: dict[PortID, PortID]
+    ports: dict[PortID, PortInstance]
+    downstream_edges: dict[PortID, set[PortID]]
+    upstream_edges: dict[PortID, PortID]
 
 
 # ==========================================
@@ -165,14 +166,14 @@ class AudioPatchSystem:
 
     def add_equipment(self, eq: EquipmentDTO) -> None:
         """AudioPatchシステムに機材とポート、その内部配線を追加する。"""
-        duplicates = self.ports.keys() & eq.port.keys()
+        duplicates = self.ports.keys() & eq.ports.keys()
         if duplicates:
             raise DuplicateIDError(duplicates)
 
         self._add_equipment(eq.equipment)
-        self.ports |= eq.port
-        self.forward_edges |= eq.forward_edges
-        self.backward_edges |= eq.backward_edges
+        self.ports |= eq.ports
+        self.forward_edges |= eq.downstream_edges
+        self.backward_edges |= eq.upstream_edges
 
     def connect_ports(self, port_a_id: PortID, port_b_id: PortID) -> None:
         """物理的な結線（方向は自動でOUT->INに正規化）"""
@@ -251,7 +252,7 @@ class AudioPatchSystem:
             stack.extend(self._get_next_downstream_ports(curr))
 
     # --- 高度な自動パッチング機能 ---
-    #不要な気がするので封印
+    # 不要な気がするので封印
     '''
     def auto_patch_mixer_from_stagebox(
         self, mixer_in_port_id: PortID, stagebox_eq_id: EquipmentID, ch_no: int
@@ -307,19 +308,24 @@ class AudioPatchSystem:
         for port_id in self._traverse_downstream(out_ports[0].id):
             port = self.ports[port_id]
             eq = self.equipments[port.equipment_id]
-            if eq.type == NodeType.MULTI_BOX and port.direction == PortDirection.OUT:
+            if (
+                eq.type == EquipmentCategory.MULTI_BOX
+                and port.direction == PortDirection.OUT
+            ):
                 sb_out_port = port
                 break
 
         if not sb_out_port:
-            raise RouteNotFoundError(instrument_eq_id, NodeType.MULTI_BOX.value)
+            raise RouteNotFoundError(
+                instrument_eq_id, EquipmentCategory.MULTI_BOX.value
+            )
 
         self.connect_ports(sb_out_port.id, mixer_in_port_id)
         return sb_out_port
 
     # =====長さ・経路取得系関数=====
 
-    def get_upstream_length(self, start_port_id: PortID) -> int:
+    def get_upstream_port_count(self, start_port_id: PortID) -> int:
         if start_port_id not in self.ports:
             raise PortNotFoundError(start_port_id)
 
@@ -341,7 +347,7 @@ class AudioPatchSystem:
 
         return max_length
 
-    def get_downstream_length(self, start_port_id: PortID) -> int:
+    def get_downstream_port_count(self, start_port_id: PortID) -> int:
         if start_port_id not in self.ports:
             raise PortNotFoundError(start_port_id)
 

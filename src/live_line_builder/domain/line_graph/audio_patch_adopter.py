@@ -9,10 +9,10 @@ from live_line_builder.domain.entities import (
 
 from .audio_patch import (
     AudioPatchSystem,
+    EquipmentCategory,
     EquipmentDTO,
     EquipmentID,
     EquipmentInstance,
-    NodeType,
     PortDirection,
     PortGender,
     PortID,
@@ -20,26 +20,26 @@ from .audio_patch import (
 )
 
 
-def _coerce_node_type(value: str) -> NodeType:
+def _coerce_node_type(value: str) -> EquipmentCategory:
     """文字列の機材種別を NodeType に変換する。"""
     normalized = value.strip().lower()
 
     if normalized in {"mic", "microphone"}:
-        return NodeType.MIC
+        return EquipmentCategory.MIC
     if normalized in {"instrument", "guitar", "bass", "keyboard", "drum"}:
-        return NodeType.INSTRUMENT
+        return EquipmentCategory.INSTRUMENT
     if normalized in {"stagebox", "stage_box", "multicore", "multibox"}:
-        return NodeType.MULTI_BOX
+        return EquipmentCategory.MULTI_BOX
     if normalized in {"mixer", "console"}:
-        return NodeType.MIXER
+        return EquipmentCategory.MIXER
     if normalized in {"processor", "fx", "effect"}:
-        return NodeType.PROCESSOR
+        return EquipmentCategory.PROCESSOR
     if normalized in {"main amp", "main_amp", "poweramp", "amp"}:
-        return NodeType.MAIN_AMP
+        return EquipmentCategory.POWER_AMP
     if normalized in {"speaker", "cabinet"}:
-        return NodeType.SPEAKER
+        return EquipmentCategory.SPEAKER
 
-    return NodeType.INSTRUMENT
+    return EquipmentCategory.INSTRUMENT
 
 
 def _coerce_port_direction(flow: str) -> PortDirection:
@@ -78,7 +78,7 @@ def build_equipment_instance(
     eq_instance = EquipmentInstance(
         EquipmentID(equipment_definition.equip_id),
         equipment_definition.name,
-        NodeType(equipment_definition.equip_type),
+        EquipmentCategory(equipment_definition.equip_type),
     )
     fileterd_ports: list[EquipmentPortRow] = [
         ports[i]

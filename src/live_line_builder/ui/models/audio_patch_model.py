@@ -10,9 +10,9 @@ from PySide6.QtCore import (
 
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
+    EquipmentCategory,
     EquipmentID,
     EquipmentInstance,
-    NodeType,
     PortInstance,
 )
 
@@ -30,6 +30,7 @@ class AudioPatchSystemAttributesModel(QObject):
     """
 
     def __init__(self, entity: AudioPatchSystem):
+        super().__init__()
         self._entity = entity
 
     @property
@@ -41,7 +42,7 @@ class AudioPatchSystemAttributesModel(QObject):
         return [
             eq.name
             for eq in self._entity.equipments.values()
-            if eq.type in [NodeType.MIXER, NodeType.MULTI_BOX]
+            if eq.type in [EquipmentCategory.MIXER, EquipmentCategory.MULTI_BOX]
         ]
 
     @property
@@ -53,7 +54,7 @@ class AudioPatchSystemAttributesModel(QObject):
         return [
             eq
             for eq in self._entity.equipments.values()
-            if eq.type in [NodeType.MIXER, NodeType.MULTI_BOX]
+            if eq.type in [EquipmentCategory.MIXER, EquipmentCategory.MULTI_BOX]
         ]
 
     @property
@@ -71,8 +72,8 @@ class PatchTableModel(QAbstractTableModel):
     def __init__(
         self,
         data: AudioPatchSystem,
-        stream: Stream,
         base_point_id: str | None = None,
+        stream: Stream = Stream.INPUT,
         parent=None,
     ):
         super().__init__(parent)
@@ -104,12 +105,16 @@ class PatchTableModel(QAbstractTableModel):
         ]
         max_length = 0
         for i in target_ports:
-            stream_length = self._data.get_upstream_length(i)
+            stream_length = self._data.get_upstream_port_count(i)
             max_length = max(max_length, stream_length)
         return max_length * 3
 
     # 必須: データを返す
-    def data(self, index: QModelIndex | QPersistentModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
+    def data(
+        self,
+        index: QModelIndex | QPersistentModelIndex,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ):
         filtered_dict = self.filtered_dict
         if not index.isValid():
             return None

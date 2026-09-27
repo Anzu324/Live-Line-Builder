@@ -3,8 +3,8 @@ from graph.const import *
 
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
+    EquipmentCategory,
     EquipmentInstance,
-    NodeType,
     PortDirection,
     PortGender,
     PortInstance,
@@ -21,11 +21,15 @@ def patch_system(qapp):
     sys = AudioPatchSystem()
 
     # --- [Arrange] 事前データの準備 ---
-    sys._add_equipment(EquipmentInstance(EQ_VO, "Vo.Mic", NodeType.MIC))
-    sys._add_equipment(EquipmentInstance(EQ_LG, "LG.Amp", NodeType.INSTRUMENT))
-    sys._add_equipment(EquipmentInstance(EQ_LG_MIC, "LG.Mic", NodeType.MIC))
-    sys._add_equipment(EquipmentInstance(EQ_SB, "MultiBox16", NodeType.MULTI_BOX))
-    sys._add_equipment(EquipmentInstance(EQ_MIX, "MG24/14FX Console", NodeType.MIXER))
+    sys._add_equipment(EquipmentInstance(EQ_VO, "Vo.Mic", EquipmentCategory.MIC))
+    sys._add_equipment(EquipmentInstance(EQ_LG, "LG.Amp", EquipmentCategory.INSTRUMENT))
+    sys._add_equipment(EquipmentInstance(EQ_LG_MIC, "LG.Mic", EquipmentCategory.MIC))
+    sys._add_equipment(
+        EquipmentInstance(EQ_SB, "MultiBox16", EquipmentCategory.MULTI_BOX)
+    )
+    sys._add_equipment(
+        EquipmentInstance(EQ_MIX, "MG24/14FX Console", EquipmentCategory.MIXER)
+    )
 
     # 楽器ポート
     sys._add_port(
@@ -85,4 +89,4 @@ def test_generate_model(patch_system):
 def test_get_model_column_length(patch_system):
     model = PatchTableModel(patch_system, EQ_SB)
     model.change_base_point(EQ_SB, Stream.INPUT)
-    assert model.columnCount() == 6
+    assert model.columnCount() == 3
