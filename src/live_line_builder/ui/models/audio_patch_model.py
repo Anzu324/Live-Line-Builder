@@ -1,6 +1,12 @@
 from enum import Enum
 
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, QObject, Qt
+from PySide6.QtCore import (
+    QAbstractTableModel,
+    QModelIndex,
+    QObject,
+    QPersistentModelIndex,
+    Qt,
+)
 
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
@@ -85,12 +91,7 @@ class PatchTableModel(QAbstractTableModel):
     def rowCount(self, parent=None):
         if self._base_point_equipment_id is None:
             return 0
-        filtered_dict = {
-            k: v
-            for k, v in self._data.ports.items()
-            if v.equipment_id == self._base_point_equipment_id
-        }
-        return len(filtered_dict)
+        return len(self.filtered_dict)
 
     # 必須: 列数を返す
     def columnCount(self, parent=None):
@@ -108,7 +109,7 @@ class PatchTableModel(QAbstractTableModel):
         return max_length * 3
 
     # 必須: データを返す
-    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QModelIndex | QPersistentModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
         filtered_dict = self.filtered_dict
         if not index.isValid():
             return None
@@ -157,7 +158,13 @@ class PatchTableModel(QAbstractTableModel):
 
         self.filtered_dictを設定する。これはCountやdataを呼ばれる。
         """
-        self.filtered_dict: list[PortInstance] = [
+        filtered_start_dict: list[PortInstance] = [
+            v
+            for v in self._data.ports.values()
+            if v.equipment_id == self._base_point_equipment_id
+        ]
+
+        self.filtered_dict = [
             v
             for v in self._data.ports.values()
             if v.equipment_id == self._base_point_equipment_id
