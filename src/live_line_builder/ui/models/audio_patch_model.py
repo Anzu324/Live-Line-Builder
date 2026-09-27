@@ -1,12 +1,13 @@
 from enum import Enum
 
-from PySide6.QtCore import QAbstractTableModel, QObject, Qt
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, QObject, Qt
 
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
     EquipmentID,
     EquipmentInstance,
     NodeType,
+    PortInstance,
 )
 
 """
@@ -74,6 +75,11 @@ class PatchTableModel(QAbstractTableModel):
             None if base_point_id is None else EquipmentID(base_point_id)
         )  # 基点となる機材のID
         self._stream = stream  # 入力または出力ストリームを指定
+        self.filtered_dict: list[PortInstance] = (
+            []
+            if base_point_id == None
+            else pre_set_filterd_dict(self._data, EquipmentID(base_point_id))
+        )  # フィルターされたリストを生成。
 
     # 必須: 行数を返す
     def rowCount(self, parent=None):
@@ -102,9 +108,16 @@ class PatchTableModel(QAbstractTableModel):
         return max_length * 3
 
     # 必須: データを返す
-    def data(self, index, role: int = Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
+        filtered_dict = self.filtered_dict
+        if not index.isValid():
+            return None
         # DisplayRoleは「画面に文字として表示するためのデータ」を要求された時
         if role == Qt.ItemDataRole.DisplayRole:
+            if index.column() == 0:
+                return filtered_dict[index.row()].equipment_id
+            if index.column() == 1:
+                return filtered_dict[index.row()].name
             return "1"  # str(self._data[index.row(), index.column()])
         return
 
@@ -127,6 +140,7 @@ class PatchTableModel(QAbstractTableModel):
         self.beginResetModel()  # リセット開始を通知
         self._base_point_equipment_id = EquipmentID(point)
         self._stream = stream
+        self.set_filterd_dict()
         self.endResetModel()  # リセット完了を通知（Viewが全再描画される）
 
     def setData(self, index, value, role: int = Qt.ItemDataRole.EditRole):
@@ -137,3 +151,22 @@ class PatchTableModel(QAbstractTableModel):
             self.dataChanged.emit(index, index)
             return True
         return False
+
+    def set_filterd_dict(self):
+        """フィルタリングされた情報を更新して属性に保持
+
+        self.filtered_dictを設定する。これはCountやdataを呼ばれる。
+        """
+        self.filtered_dict: list[PortInstance] = [
+            v
+            for v in self._data.ports.values()
+            if v.equipment_id == self._base_point_equipment_id
+        ]
+
+
+# __init__内でset_filterd_dicが呼べないので同等機能の関数。
+def pre_set_filterd_dict(
+    data, base_point_equipment_id: EquipmentID
+) -> list[PortInstance]:
+    """フィルタリングされた情報を更新して属性に保持"""
+    return [v for v in data.ports.values() if v.equipment_id == base_point_equipment_id]
