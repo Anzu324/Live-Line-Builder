@@ -35,7 +35,7 @@ class ProjectSerializer:
     Entity ➔ Schema(Pydantic) ➔ JSON
     """
 
-    def load(self, json_str: str) -> ProjectDataCargo:
+    def deserialize(self, json_str: str) -> ProjectDataCargo:
         """JSON(ネスト) ➔ Entity(フラット)"""
         schema = ProjectDataSchema.model_validate_json(json_str)
 
@@ -131,7 +131,7 @@ class ProjectSerializer:
             performance_groups,
         )
 
-    def dump(
+    def serialize(
         self,
         equip_table: EquipmentDefinition,
         port_table: EquipmentPortDefinition,

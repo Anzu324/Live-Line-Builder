@@ -16,10 +16,10 @@ class ProjectRepository:
         """
         mock_path = Path(__file__).resolve().parent.parent / "app_mock" / mock_file_name
         json_str = mock_path.read_text(encoding="utf-8")
-        return self._serializer.load(json_str)
+        return self._serializer.deserialize(json_str)
 
     def load(self, file_path: Path) -> ProjectDataCargo:
-        return self._serializer.load(file_path.read_text(encoding="utf-8"))
+        return self._serializer.deserialize(file_path.read_text(encoding="utf-8"))
 
     def save(
         self,
@@ -28,7 +28,7 @@ class ProjectRepository:
         performance_groups,
         file_path: Path,
     ):
-        json_str = self._serializer.dump(
+        json_str = self._serializer.serialize(
             equipment_entity, equipment_port_entity, performance_groups
         )
         file_path.write_text(json_str, encoding="utf-8")

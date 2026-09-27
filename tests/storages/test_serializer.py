@@ -23,7 +23,7 @@ def test_serializer_load_mock_data_structure():
         / "app_mock"
         / "full_mock_data.json"
     )
-    cargo = serializer.load(json_path.read_text(encoding="utf-8"))
+    cargo = serializer.deserialize(json_path.read_text(encoding="utf-8"))
 
     assert isinstance(cargo.equipment_entity, EquipmentDefinition)
     assert isinstance(cargo.equipment_port_entity, EquipmentPortDefinition)
@@ -41,14 +41,14 @@ def test_serializer_round_trip():
         / "app_mock"
         / "full_mock_data.json"
     )
-    original = serializer.load(json_path.read_text(encoding="utf-8"))
+    original = serializer.deserialize(json_path.read_text(encoding="utf-8"))
 
-    json_str = serializer.dump(
+    json_str = serializer.serialize(
         original.equipment_entity,
         original.equipment_port_entity,
         original.performance_group_list,
     )
-    reloaded = serializer.load(json_str)
+    reloaded = serializer.deserialize(json_str)
 
     assert len(reloaded.equipment_entity.rows) == len(original.equipment_entity.rows)
     assert len(reloaded.equipment_port_entity.rows) == len(
@@ -71,7 +71,7 @@ def test_performance_group_loaded():
         / "app_mock"
         / "full_mock_data.json"
     )
-    cargo = serializer.load(json_path.read_text(encoding="utf-8"))
+    cargo = serializer.deserialize(json_path.read_text(encoding="utf-8"))
 
     day1: PerformanceGroup = cargo.performance_group_list[0]
     info1 = day1._performance_info
@@ -113,7 +113,7 @@ def test_equipment_and_port_entities():
         / "app_mock"
         / "full_mock_data.json"
     )
-    cargo = serializer.load(json_path.read_text(encoding="utf-8"))
+    cargo = serializer.deserialize(json_path.read_text(encoding="utf-8"))
 
     equip_entity = cargo.equipment_entity
     port_entity = cargo.equipment_port_entity
