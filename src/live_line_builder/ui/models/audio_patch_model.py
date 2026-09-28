@@ -77,16 +77,32 @@ class PatchTableModel(QAbstractTableModel):
         parent=None,
     ):
         super().__init__(parent)
-        self._data = data  # 2次元リストなどのデータを保持
+        self._data = data
         self._base_point_equipment_id: EquipmentID | None = (
             None if base_point_id is None else EquipmentID(base_point_id)
-        )  # 基点となる機材のID
-        self._stream = stream  # 入力または出力ストリームを指定
-        self.filtered_dict: list[PortInstance] = (
-            []
-            if base_point_id == None
-            else pre_set_filterd_dict(self._data, EquipmentID(base_point_id))
-        )  # フィルターされたリストを生成。
+        )
+        self._stream = stream
+        self.filtered_dict: list[list[PortInstance]] = (
+            [] if base_point_id is None else self._build_filtered_ports()
+        )
+
+    def _build_filtered_ports(self) -> list[list[PortInstance]]:
+        if self._base_point_equipment_id is None:
+            return []
+
+        start_ports = [
+            port
+            for port in self._data.ports.values()
+            if port.equipment_id == self._base_point_equipment_id
+        ]
+
+        return [
+            [
+                self._data.ports[port_id]
+                for port_id in self._data.get_upstream_ports(port.id)
+            ]
+            for port in start_ports
+        ]
 
     # 必須: 行数を返す
     def rowCount(self, parent=None):
@@ -96,18 +112,30 @@ class PatchTableModel(QAbstractTableModel):
 
     # 必須: 列数を返す
     def columnCount(self, parent=None):
-        if self._data is None:
+        if self._data is None or self._base_point_equipment_id is None:
             return 0
-        target_ports = [
-            i.id
-            for i in self._data.ports.values()
-            if i.equipment_id == self._base_point_equipment_id
-        ]
-        max_length = 0
-        for i in target_ports:
-            stream_length = self._data.get_upstream_port_count(i)
-            max_length = max(max_length, stream_length)
-        return max_length * 3
+        if not self.filtered_dict:
+            return 0
+
+        max_row_length = max(len(row) for row in self.filtered_dict)
+        return max_row_length * 3
+
+    def _cell_value_for_index(self, row_index: int, column_index: int) -> str | None:
+        if not 0 <= row_index < len(self.filtered_dict):
+            return None
+
+        row = self.filtered_dict[row_index]
+        if not row:
+            return None
+
+        # 既存のテーブル設計では列幅を 3 で見ていたため、実際の行長より広く確保している。
+        # そのため、表示上の列インデックスが行の長さを超えても、実データ側は先頭要素を返す。
+        if column_index < 0:
+            return None
+
+        port_index = min(column_index, len(row) - 1)
+        port = row[port_index]
+        return port.name if isinstance(port, PortInstance) else str(port)
 
     # 必須: データを返す
     def data(
@@ -115,17 +143,13 @@ class PatchTableModel(QAbstractTableModel):
         index: QModelIndex | QPersistentModelIndex,
         role: int = Qt.ItemDataRole.DisplayRole,
     ):
-        filtered_dict = self.filtered_dict
         if not index.isValid():
             return None
-        # DisplayRoleは「画面に文字として表示するためのデータ」を要求された時
-        if role == Qt.ItemDataRole.DisplayRole:
-            if index.column() == 0:
-                return filtered_dict[index.row()].equipment_id
-            if index.column() == 1:
-                return filtered_dict[index.row()].name
-            return "1"  # str(self._data[index.row(), index.column()])
-        return
+
+        if role != Qt.ItemDataRole.DisplayRole:
+            return None
+
+        return self._cell_value_for_index(index.row(), index.column())
 
     def headerData(self, section, orientation, role: int = Qt.ItemDataRole.DisplayRole):
         if role == Qt.ItemDataRole.DisplayRole:
@@ -161,24 +185,22 @@ class PatchTableModel(QAbstractTableModel):
     def set_filterd_dict(self):
         """フィルタリングされた情報を更新して属性に保持
 
-        self.filtered_dictを設定する。これはCountやdataを呼ばれる。
+        self.filtered_dictは各行が上流へ辿った `PortInstance` の列を持つ。
         """
-        filtered_start_dict: list[PortInstance] = [
-            v
-            for v in self._data.ports.values()
-            if v.equipment_id == self._base_point_equipment_id
-        ]
-
-        self.filtered_dict = [
-            v
-            for v in self._data.ports.values()
-            if v.equipment_id == self._base_point_equipment_id
-        ]
+        self.filtered_dict = self._build_filtered_ports()
 
 
 # __init__内でset_filterd_dicが呼べないので同等機能の関数。
 def pre_set_filterd_dict(
-    data, base_point_equipment_id: EquipmentID
-) -> list[PortInstance]:
-    """フィルタリングされた情報を更新して属性に保持"""
-    return [v for v in data.ports.values() if v.equipment_id == base_point_equipment_id]
+    data: AudioPatchSystem, base_point_equipment_id: EquipmentID
+) -> list[list[PortInstance]]:
+    """指定機材から上流へ辿れるポート情報の2次元リストを返す。"""
+    start_ports = [
+        port
+        for port in data.ports.values()
+        if port.equipment_id == base_point_equipment_id
+    ]
+    return [
+        [data.ports[port_id] for port_id in data.get_upstream_ports(port.id)]
+        for port in start_ports
+    ]

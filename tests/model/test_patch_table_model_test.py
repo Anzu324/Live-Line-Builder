@@ -1,5 +1,6 @@
 import pytest
 from graph.const import *
+from PySide6.QtCore import Qt
 
 from live_line_builder.domain.line_graph.audio_patch import (
     AudioPatchSystem,
@@ -90,3 +91,13 @@ def test_get_model_column_length(patch_system):
     model = PatchTableModel(patch_system, EQ_SB)
     model.change_base_point(EQ_SB, Stream.INPUT)
     assert model.columnCount() == 3
+
+
+def test_model_data_returns_port_name(patch_system):
+    model = PatchTableModel(patch_system, EQ_SB)
+    model.change_base_point(EQ_SB, Stream.INPUT)
+
+    value = model.data(model.index(0, 0), Qt.DisplayRole)
+
+    assert isinstance(value, str)
+    assert value

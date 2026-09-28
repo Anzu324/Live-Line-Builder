@@ -19,7 +19,8 @@ class AudioPatchController(QObject):
         self._view = view
         self._attributes_model = attributes_model
         self._table_model = PatchTableModel(
-            attributes_model.get_raw_entity, Stream.INPUT, parent=self
+            attributes_model.get_raw_entity,
+            parent=self,
         )
         self._view.set_combo_items(attributes_model.gateway_equipments_name)
         self._view.table.setModel(self._table_model)
